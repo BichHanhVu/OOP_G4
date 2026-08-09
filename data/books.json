@@ -1,0 +1,34 @@
+[
+  {
+    "code": "BK001",
+    "title": "Lập Trình Java Căn Bản",
+    "author": "Nguyễn Văn An",
+    "genre": "Công nghệ",
+    "availableQuantity": 10,
+    "price": 120000.0
+  },
+  {
+    "code": "BK002",
+    "title": "Cấu Trúc Dữ Liệu & Giải Thuật",
+    "author": "Trần Thị Bình",
+    "genre": "Công nghệ",
+    "availableQuantity": 5,
+    "price": 150000.0
+  },
+  {
+    "code": "BK003",
+    "title": "Đắc Nhân Tâm",
+    "author": "Dale Carnegie",
+    "genre": "Văn học",
+    "availableQuantity": 0,
+    "price": 98000.0
+  },
+  {
+    "code": "BK004",
+    "title": "Sách Python",
+    "author": "Mr Python",
+    "genre": "Công nghệ",
+    "availableQuantity": 0,
+    "price": 123456.0
+  }
+]
