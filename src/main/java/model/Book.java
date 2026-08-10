@@ -16,9 +16,10 @@ public class Book implements Borrowable {
         this.title = title;
         this.author = author;
         this.genre = genre;
-        this.availableQuantity = availableQuantity;
-        this.price = price;
+        setAvailableQuantity(availableQuantity);
+        setPrice(price);
     }
+
 
     @Override
     public boolean canBorrow() {
@@ -75,6 +76,9 @@ public class Book implements Borrowable {
     }
 
     public void setAvailableQuantity(int availableQuantity) {
+        if (availableQuantity < 0) {
+            throw new IllegalArgumentException("Lỗi: Số lượng sách hiện có không được âm!");
+        }
         this.availableQuantity = availableQuantity;
     }
 
@@ -83,6 +87,9 @@ public class Book implements Borrowable {
     }
 
     public void setPrice(double price) {
+        if (price < 0) {
+            throw new IllegalArgumentException("Lỗi: Giá trị sách không được âm!");
+        }
         this.price = price;
     }
 }

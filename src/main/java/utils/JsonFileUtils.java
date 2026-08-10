@@ -29,15 +29,29 @@ public class JsonFileUtils {
 
             CollectionType listType = objectMapper.getTypeFactory()
                     .constructCollectionType(ArrayList.class, clazz);
-            
+
             List<T> data = objectMapper.readValue(file, listType);
             return data != null ? data : new ArrayList<>();
 
         } catch (IOException e) {
-            System.err.println("Lỗi khi đọc file JSON (" + filePath + "): " + e.getMessage());
+            System.err.println("Lỗi khi đọc file JSON " + e.getMessage());
             return new ArrayList<>();
         }
     }
+
+    public static <T> void writeListToFile(String filePath, List<T> data) {
+        File file = new File(filePath);
+
+        try {
+            createFileIfNotExist(file);
+
+            objectMapper.writeValue(file, data != null ? data : new ArrayList<>());
+
+        } catch (IOException e) {
+            throw new RuntimeException("Không thể ghi", e);
+        }
+    }
+
 
     private static void createFileIfNotExist(File file) throws IOException {
         if (file.getParentFile() != null && !file.getParentFile().exists()) {
