@@ -60,8 +60,11 @@ function renderBookTable(books) {
             <td>${book.price ? book.price.toLocaleString('vi-VN') : 0} đ</td>
             <td>${statusBadge}</td>
             <td class="text-center">
-                <button class="btn btn-sm btn-outline-warning" onclick="openEditModal('${book.code}')">
+                <button class="btn btn-warning" onclick="openEditModal('${book.code}')">
                     Cập nhật
+                </button>
+                <button class="btn btn-danger" onclick="deleteBook('${book.code}')">
+                    Xóa
                 </button>
             </td>
         `;
@@ -126,6 +129,28 @@ async function saveBook(event) {
         }
 
         bookModal.hide();
+        fetchAndRenderBooks();
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+async function deleteBook(code) {
+    if (!confirm(`Bạn có chắc chắn muốn xóa sách có mã '${code}' không?`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/books?code=${encodeURIComponent(code)}`, {
+            method: 'DELETE'
+        });
+
+        if (!response.ok) {
+            const errorMsg = await response.text();
+            throw new Error(errorMsg || 'Xóa sách thất bại!');
+        }
+
+        alert('Xóa sách thành công!');
         fetchAndRenderBooks();
     } catch (error) {
         alert(error.message);

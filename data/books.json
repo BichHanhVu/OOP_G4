@@ -20,13 +20,6 @@
   "availableQuantity" : 0,
   "price" : 98000.0
 }, {
-  "code" : "BK004",
-  "title" : "Sách Python",
-  "author" : "Mr Python",
-  "genre" : "Công nghệ",
-  "availableQuantity" : 0,
-  "price" : 123456.0
-}, {
   "code" : "BK005",
   "title" : "Những ngày thơ ấu",
   "author" : "Nguyên Hồng",

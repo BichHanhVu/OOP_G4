@@ -44,4 +44,11 @@ public class JsonBookRepository implements BookRepository {
         }
         JsonFileUtils.writeListToFile(filePath, books);
     }
+
+    @Override
+    public void deleteByCode(String code) {
+        List<Book> books = findAll();
+        books.removeIf(book -> book.getCode().equalsIgnoreCase(code));
+        JsonFileUtils.writeListToFile(filePath, books);
+    }
 }

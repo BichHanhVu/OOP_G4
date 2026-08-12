@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -36,6 +37,9 @@ public class BookHandler implements HttpHandler {
                 case "PUT":
                     handlePut(exchange);
                     break;
+                case "DELETE":
+                    handleDelete(exchange);
+                    break;
                 default:
                     sendResponse(exchange, 405, "Phương thức HTTP không được hỗ trợ!");
                     break;
@@ -60,7 +64,7 @@ public class BookHandler implements HttpHandler {
         BookResponse newBook = bookService.addBook(request);
         String jsonResponse = objectMapper.writeValueAsString(newBook);
 
-        sendJsonResponse(exchange, 201, jsonResponse); // 201 Created
+        sendJsonResponse(exchange, 201, jsonResponse);
     }
 
     private void handlePut(HttpExchange exchange) throws IOException {
@@ -71,6 +75,24 @@ public class BookHandler implements HttpHandler {
         String jsonResponse = objectMapper.writeValueAsString(updatedBook);
 
         sendJsonResponse(exchange, 200, jsonResponse);
+    }
+
+    private void handleDelete(HttpExchange exchange) throws IOException {
+        URI requestURI = exchange.getRequestURI();
+        String query = requestURI.getQuery();
+
+        String code = null;
+        if (query != null && query.startsWith("code=")) {
+            code = query.split("=")[1];
+        }
+
+        if (code == null || code.trim().isEmpty()) {
+            sendResponse(exchange, 400, "Lỗi: Thiếu tham số mã sách 'code'!");
+            return;
+        }
+
+        bookService.deleteBook(code);
+        sendResponse(exchange, 200, "Xóa sách thành công!");
     }
 
     private void sendJsonResponse(HttpExchange exchange, int statusCode, String json) throws IOException {

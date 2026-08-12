@@ -9,4 +9,5 @@ public interface BookRepository {
     Optional<Book> findByCode(String code);
     void save(Book book);
     void update(Book book);
+    void deleteByCode(String code);
 }

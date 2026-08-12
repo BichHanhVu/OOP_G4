@@ -82,4 +82,20 @@ public class BookService {
                 book.getPrice()
         );
     }
+
+    public void deleteBook(String code) {
+        Book book = bookRepository.findByCode(code)
+                .orElseThrow(() -> new IllegalArgumentException("Lỗi: Không tìm thấy sách để xóa!"));
+
+        if (isBookCurrentlyBorrowed(code)) {
+            throw new IllegalStateException("Lỗi: Không thể xóa sách đang nằm trong phiếu mượn chưa trả!");
+        }
+
+        bookRepository.deleteByCode(code);
+    }
+
+    private boolean isBookCurrentlyBorrowed(String bookCode) {
+        return false;
+    }
+
 }
