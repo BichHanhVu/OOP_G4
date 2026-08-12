@@ -60,10 +60,10 @@ function renderBookTable(books) {
             <td>${book.price ? book.price.toLocaleString('vi-VN') : 0} đ</td>
             <td>${statusBadge}</td>
             <td class="text-center">
-                <button class="btn btn-warning" onclick="openEditModal('${book.code}')">
+                <button class="btn btn-sm btn-outline-warning me-1" onclick="openEditModal('${book.code}')">
                     Cập nhật
                 </button>
-                <button class="btn btn-danger" onclick="deleteBook('${book.code}')">
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteBook('${book.code}')">
                     Xóa
                 </button>
             </td>
@@ -154,5 +154,36 @@ async function deleteBook(code) {
         fetchAndRenderBooks();
     } catch (error) {
         alert(error.message);
+    }
+}
+
+async function importBooks(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!confirm(`Xác nhận nhập dữ liệu từ file '${file.name}'?`)) {
+        event.target.value = '';
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/books/import', {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/csv; charset=utf-8' },
+            body: file
+        });
+
+        const resultText = await response.text();
+
+        if (!response.ok) {
+            throw new Error(resultText || 'Nhập dữ liệu thất bại!');
+        }
+
+        alert(resultText);
+        fetchAndRenderBooks();
+    } catch (error) {
+        alert(error.message);
+    } finally {
+        event.target.value = '';
     }
 }

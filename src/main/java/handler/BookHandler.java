@@ -25,27 +25,38 @@ public class BookHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         String method = exchange.getRequestMethod();
+        String path = exchange.getRequestURI().getPath();
 
         try {
-            switch (method.toUpperCase()) {
-                case "GET":
-                    handleGet(exchange);
-                    break;
-                case "POST":
-                    handlePost(exchange);
-                    break;
-                case "PUT":
-                    handlePut(exchange);
-                    break;
-                case "DELETE":
-                    handleDelete(exchange);
-                    break;
-                default:
-                    sendResponse(exchange, 405, "Phương thức HTTP không được hỗ trợ!");
-                    break;
+            if ("GET".equalsIgnoreCase(method) && "/api/books/export".equals(path)) {
+                handleExport(exchange);
+            } else if ("POST".equalsIgnoreCase(method) && "/api/books/import".equals(path)) {
+                handleImport(exchange);
+            } else {
+                try {
+                    switch (method.toUpperCase()) {
+                        case "GET":
+                            handleGet(exchange);
+                            break;
+                        case "POST":
+                            handlePost(exchange);
+                            break;
+                        case "PUT":
+                            handlePut(exchange);
+                            break;
+                        case "DELETE":
+                            handleDelete(exchange);
+                            break;
+                        default:
+                            sendResponse(exchange, 405, "Phương thức HTTP không được hỗ trợ!");
+                            break;
+                    }
+                } catch (IllegalArgumentException | IllegalStateException e) {
+                    sendResponse(exchange, 400, e.getMessage());
+                } catch (Exception e) {
+                    sendResponse(exchange, 500, "Lỗi Server: " + e.getMessage());
+                }
             }
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            sendResponse(exchange, 400, e.getMessage());
         } catch (Exception e) {
             sendResponse(exchange, 500, "Lỗi Server: " + e.getMessage());
         }
@@ -93,6 +104,29 @@ public class BookHandler implements HttpHandler {
 
         bookService.deleteBook(code);
         sendResponse(exchange, 200, "Xóa sách thành công!");
+    }
+
+
+    private void handleExport(HttpExchange exchange) throws IOException {
+        String csvData = bookService.exportBooks();
+        byte[] bytes = csvData.getBytes(StandardCharsets.UTF_8);
+
+        exchange.getResponseHeaders().set("Content-Type", "text/csv; charset=UTF-8");
+        exchange.getResponseHeaders().set("Content-Disposition", "attachment; filename=danh_sach_sach.csv");
+        exchange.sendResponseHeaders(200, bytes.length);
+
+        try (OutputStream os = exchange.getResponseBody()) {
+            os.write(bytes);
+        }
+    }
+
+    private void handleImport(HttpExchange exchange) throws IOException {
+        try (InputStream is = exchange.getRequestBody()) {
+            int count = bookService.importBooks(is);
+            sendResponse(exchange, 200, "Đã nhập thành công " + count + " cuốn sách!");
+        } catch (Exception e) {
+            sendResponse(exchange, 400, "Lỗi đọc file CSV: " + e.getMessage());
+        }
     }
 
     private void sendJsonResponse(HttpExchange exchange, int statusCode, String json) throws IOException {

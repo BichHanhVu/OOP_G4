@@ -19,11 +19,4 @@
   "genre" : "Văn học",
   "availableQuantity" : 0,
   "price" : 98000.0
-}, {
-  "code" : "BK005",
-  "title" : "Những ngày thơ ấu",
-  "author" : "Nguyên Hồng",
-  "genre" : "Văn học",
-  "availableQuantity" : 12,
-  "price" : 56000.0
 } ]
