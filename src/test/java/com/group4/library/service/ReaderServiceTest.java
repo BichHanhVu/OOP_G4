@@ -52,7 +52,18 @@ class ReaderServiceTest {
 
         assertThrows(BusinessException.class, () -> readerService.create(request));
     }
+    // thêm vào ReaderServiceTest.java
+    @Test
+    void themBanDoc_khongTruyenId_sinhMaKeTiepDungTheoDuLieuHienCo() {
+        readerService.create(buildRequest("R001", "Nguyễn Văn A", "0912345678", "STUDENT"));
+        readerService.create(buildRequest("R002", "Trần Thị B", "0987654321", "PRIORITY_STUDENT"));
+        readerService.create(buildRequest("R003", "Lê Văn C", "0901112223", "LECTURER"));
 
+        ReaderResponse response = readerService.create(
+                buildRequest(null, "Phạm Thị D", "0909998887", "STUDENT"));
+
+        assertEquals("R004", response.getId());
+    }
     @Test
     void themBanDoc_sdtSaiDinhDang_baoLoi() {
         ReaderRequest request = buildRequest(null, "Nguyễn Văn A", "abc123", "STUDENT");

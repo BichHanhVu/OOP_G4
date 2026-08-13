@@ -1,3 +1,4 @@
+// static/js/readers.js
 async function loadReaders(keyword = "", type = "") {
     try {
         const params = new URLSearchParams();
@@ -12,15 +13,34 @@ async function loadReaders(keyword = "", type = "") {
 
 function renderTable(readers) {
     const typeLabel = { STUDENT: "Sinh viên thường", PRIORITY_STUDENT: "Sinh viên ưu tiên", LECTURER: "Giảng viên" };
-    document.getElementById("readerTableBody").innerHTML = readers.map(r => `
-        <tr>
-            <td>${r.id}</td><td>${r.name}</td><td>${r.phoneNumber}</td>
-            <td>${typeLabel[r.type] || r.type}</td><td>${r.maxBorrowLimit}</td>
-            <td>
-                <button onclick="openEditForm('${r.id}')">Sửa</button>
-                <button onclick="deleteReader('${r.id}')">Xóa</button>
-            </td>
-        </tr>`).join("");
+    const tbody = document.getElementById("readerTableBody");
+    tbody.innerHTML = ""; // xóa nội dung cũ an toàn
+
+    readers.forEach(r => {
+        const tr = document.createElement("tr");
+
+        const cellValues = [r.id, r.name, r.phoneNumber, typeLabel[r.type] || r.type, r.maxBorrowLimit];
+        cellValues.forEach(value => {
+            const td = document.createElement("td");
+            td.textContent = value; // dùng textContent thay vì chèn thẳng vào innerHTML -> chống XSS
+            tr.appendChild(td);
+        });
+
+        const actionTd = document.createElement("td");
+        const editBtn = document.createElement("button");
+        editBtn.textContent = "Sửa";
+        editBtn.onclick = () => openEditForm(r.id);
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Xóa";
+        deleteBtn.onclick = () => deleteReader(r.id);
+
+        actionTd.appendChild(editBtn);
+        actionTd.appendChild(deleteBtn);
+        tr.appendChild(actionTd);
+
+        tbody.appendChild(tr);
+    });
 }
 
 function searchReaders() {
@@ -35,17 +55,22 @@ function openCreateForm() {
     document.getElementById("editingId").value = "";
     document.getElementById("nameInput").value = "";
     document.getElementById("phoneInput").value = "";
+    document.getElementById("typeInput").value = "STUDENT"; // reset về mặc định, không giữ lựa chọn lần sửa trước
     document.getElementById("readerForm").style.display = "block";
 }
 
 async function openEditForm(id) {
-    const reader = await apiRequest(`/readers/${id}`);
-    document.getElementById("formTitle").textContent = "Sửa bạn đọc";
-    document.getElementById("editingId").value = reader.id;
-    document.getElementById("nameInput").value = reader.name;
-    document.getElementById("phoneInput").value = reader.phoneNumber;
-    document.getElementById("typeInput").value = reader.type;
-    document.getElementById("readerForm").style.display = "block";
+    try {
+        const reader = await apiRequest(`/readers/${id}`);
+        document.getElementById("formTitle").textContent = "Sửa bạn đọc";
+        document.getElementById("editingId").value = reader.id;
+        document.getElementById("nameInput").value = reader.name;
+        document.getElementById("phoneInput").value = reader.phoneNumber;
+        document.getElementById("typeInput").value = reader.type;
+        document.getElementById("readerForm").style.display = "block";
+    } catch (e) {
+        showMessage(e.message, true);
+    }
 }
 
 function closeForm() {

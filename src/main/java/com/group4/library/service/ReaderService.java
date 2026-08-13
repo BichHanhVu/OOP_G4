@@ -38,11 +38,14 @@ public class ReaderService {
         return toResponse(findOrThrow(id));
     }
 
+    // service/ReaderService.java — chỉ đoạn create() thay đổi
     public ReaderResponse create(ReaderRequest request) {
         validateRequest(request);
 
         String id = (request.getId() != null && !request.getId().isBlank())
-                ? request.getId() : IdGenerator.nextReaderId();
+                ? request.getId()
+                : IdGenerator.nextReaderId(
+                readerRepository.findAll().stream().map(Reader::getId).toList());
 
         if (readerRepository.existsById(id)) {
             throw new BusinessException("Mã bạn đọc đã tồn tại: " + id);
