@@ -1,15 +1,14 @@
 package com.group4.library.dto;
 
-public class BorrowItemRequest {
+public class BorrowItemResponse {
 
-    // Sử dụng 'code' để đồng bộ với module Book
     private String code;
     private int quantity;
 
-    public BorrowItemRequest() {
+    public BorrowItemResponse() {
     }
 
-    public BorrowItemRequest(String code, int quantity) {
+    public BorrowItemResponse(String code, int quantity) {
         this.code = code;
         this.quantity = quantity;
     }

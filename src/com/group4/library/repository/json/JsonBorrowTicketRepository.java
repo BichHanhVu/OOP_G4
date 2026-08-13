@@ -1,105 +1,151 @@
 package com.group4.library.repository.json;
+import com.group4.library.repository.BorrowTicketRepository;
+
 
 import com.group4.library.model.BorrowTicket;
 import com.group4.library.model.TicketStatus;
-import com.group4.library.repository.BorrowTicketRepository;
-import com.group4.library.utils.JsonFileUtils;
+// // Code của Tiệp: Import class tiện ích đọc/ghi JSON dùng chung
+// import com.group4.library.util.JsonFileUtils;
 
+import org.springframework.stereotype.Repository;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Repository
 public class JsonBorrowTicketRepository implements BorrowTicketRepository {
 
-    // Đường dẫn file JSON được chốt trong cấu trúc dự án
+    // Đường dẫn chuẩn thống nhất theo dự án
     private static final String FILE_PATH = "data/borrow-tickets.json";
-
-    private final List<BorrowTicket> borrowTickets;
+    private final List<BorrowTicket> tickets = new ArrayList<>();
 
     public JsonBorrowTicketRepository() {
-        // Đọc dữ liệu từ file JSON thông qua JsonFileUtils thay vì khởi tạo danh sách rỗng
-        List<BorrowTicket> loadedTickets = JsonFileUtils.readListFromFile(FILE_PATH, BorrowTicket.class);
-        this.borrowTickets = loadedTickets != null ? loadedTickets : new ArrayList<>();
+        // Tự động kiểm tra/tạo thư mục 'data' nếu chưa có
+        File dir = new File("data");
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        // Load dữ liệu cũ từ JSON ngay khi khởi tạo (không để danh sách rỗng)
+        loadDataFromFile();
+    }
+
+    /**
+     * Đọc toàn bộ dữ liệu từ file data/borrow-tickets.json
+     */
+    private synchronized void loadDataFromFile() {
+        tickets.clear();
+        /* // Code của Tiệp: Đọc danh sách từ file JSON dùng chung
+        List<BorrowTicket> loaded = JsonFileUtils.readList(FILE_PATH, BorrowTicket.class);
+        if (loaded != null) {
+            tickets.addAll(loaded);
+        }
+        */
+    }
+
+    /**
+     * Ghi toàn bộ danh sách trở lại file data/borrow-tickets.json sau khi thay đổi
+     */
+    private synchronized void saveDataToFile() {
+        /* // Code của Tiệp: Ghi danh sách xuống file JSON dùng chung
+        JsonFileUtils.writeList(FILE_PATH, tickets);
+        */
     }
 
     @Override
-    public List<BorrowTicket> findAll() {
-        return new ArrayList<>(borrowTickets);
+    public synchronized BorrowTicket save(BorrowTicket ticket) {
+        if (ticket == null || ticket.getTicketId() == null || ticket.getTicketId().trim().isEmpty()) {
+            throw new IllegalArgumentException("Phiếu mượn và Mã phiếu (ticketId) không được để trống!");
+        }
+
+        // So sánh Null-safe và không phân biệt hoa/thường (IgnoreCase)
+        int existingIndex = -1;
+        for (int i = 0; i < tickets.size(); i++) {
+            BorrowTicket current = tickets.get(i);
+            if (current != null && current.getTicketId() != null
+                    && current.getTicketId().trim().equalsIgnoreCase(ticket.getTicketId().trim())) {
+                existingIndex = i;
+                break;
+            }
+        }
+
+        if (existingIndex >= 0) {
+            tickets.set(existingIndex, ticket); // Cập nhật
+        } else {
+            tickets.add(ticket); // Thêm mới
+        }
+
+        // Ghi lại toàn bộ danh sách xuống file JSON sau khi lưu/cập nhật
+        saveDataToFile();
+
+        return ticket;
     }
 
     @Override
-    public Optional<BorrowTicket> findById(String ticketId) {
-        if (ticketId == null || ticketId.trim().isEmpty()) {
+    public synchronized Optional<BorrowTicket> findById(String id) {
+        if (id == null || id.trim().isEmpty()) {
             return Optional.empty();
         }
 
-        // So sánh null-safe và không phân biệt chữ hoa/thường theo góp ý
-        return borrowTickets.stream()
-                .filter(ticket -> ticket != null && ticket.getTicketId() != null)
-                .filter(ticket -> ticket.getTicketId().equalsIgnoreCase(ticketId.trim()))
+        // Nạp lại dữ liệu để đảm bảo tính đồng bộ
+        loadDataFromFile();
+
+        // So sánh Null-safe & không phân biệt chữ hoa/thường
+        return tickets.stream()
+                .filter(Objects::nonNull)
+                .filter(t -> t.getTicketId() != null && t.getTicketId().trim().equalsIgnoreCase(id.trim()))
                 .findFirst();
     }
 
     @Override
-    public List<BorrowTicket> findByReaderId(String readerId) {
+    public synchronized List<BorrowTicket> findAll() {
+        loadDataFromFile();
+        return new ArrayList<>(tickets);
+    }
+
+    @Override
+    public synchronized List<BorrowTicket> findByReaderId(String readerId) {
         if (readerId == null || readerId.trim().isEmpty()) {
             return new ArrayList<>();
         }
+        loadDataFromFile();
 
-        return borrowTickets.stream()
-                .filter(ticket -> ticket != null && ticket.getReaderId() != null)
-                .filter(ticket -> ticket.getReaderId().equalsIgnoreCase(readerId.trim()))
+        // So sánh Null-safe & không phân biệt chữ hoa/thường
+        return tickets.stream()
+                .filter(Objects::nonNull)
+                .filter(t -> t.getReaderId() != null && t.getReaderId().trim().equalsIgnoreCase(readerId.trim()))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<BorrowTicket> findByStatus(TicketStatus status) {
+    public synchronized List<BorrowTicket> findByStatus(TicketStatus status) {
         if (status == null) {
             return new ArrayList<>();
         }
+        loadDataFromFile();
 
-        return borrowTickets.stream()
-                .filter(ticket -> ticket != null && ticket.getStatus() == status)
+        return tickets.stream()
+                .filter(Objects::nonNull)
+                .filter(t -> t.getStatus() == status)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<BorrowTicket> findByReaderIdAndStatus(String readerId, TicketStatus status) {
-        if (readerId == null || status == null) {
+    public synchronized List<BorrowTicket> findByReaderIdAndStatus(String readerId, TicketStatus status) {
+        if (readerId == null || readerId.trim().isEmpty() || status == null) {
             return new ArrayList<>();
         }
+        loadDataFromFile();
 
-        return borrowTickets.stream()
-                .filter(ticket -> ticket != null
-                        && ticket.getReaderId() != null
-                        && ticket.getReaderId().equalsIgnoreCase(readerId.trim())
-                        && ticket.getStatus() == status)
+        // So sánh Null-safe & không phân biệt chữ hoa/thường
+        return tickets.stream()
+                .filter(Objects::nonNull)
+                .filter(t -> t.getReaderId() != null && t.getReaderId().trim().equalsIgnoreCase(readerId.trim()))
+                .filter(t -> t.getStatus() == status)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public synchronized BorrowTicket save(BorrowTicket borrowTicket) {
-        if (borrowTicket == null || borrowTicket.getTicketId() == null) {
-            throw new IllegalArgumentException("Không thể lưu phiếu mượn không hợp lệ hoặc thiếu mã ticketId");
-        }
-
-        // Kiểm tra xem phiếu mượn đã tồn tại chưa để cập nhật hoặc thêm mới
-        Optional<BorrowTicket> existingTicket = findById(borrowTicket.getTicketId());
-        existingTicket.ifPresent(borrowTickets::remove);
-
-        borrowTickets.add(borrowTicket);
-
-        // Lưu toàn bộ danh sách xuống file JSON để đảm bảo tính lưu trữ dữ liệu (File IO)
-        saveToFile();
-
-        return borrowTicket;
-    }
-
-    /**
-     * Phương thức hỗ trợ ghi danh sách phiếu mượn hiện tại ra file JSON
-     */
-    private void saveToFile() {
-        JsonFileUtils.writeListToFile(FILE_PATH, this.borrowTickets);
     }
 }

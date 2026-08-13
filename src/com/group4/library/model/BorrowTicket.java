@@ -1,4 +1,3 @@
-
 package com.group4.library.model;
 
 import java.time.LocalDate;
@@ -11,29 +10,73 @@ public class BorrowTicket {
     private String readerId;
     private LocalDate borrowDate;
     private LocalDate dueDate;
+    private LocalDate returnDate;
     private TicketStatus status;
-    private List<BorrowTicketDetail> items;
+    private List<BorrowTicketDetail> items = new ArrayList<>();
 
     public BorrowTicket() {
-        this.items = new ArrayList<>();
     }
 
-    public BorrowTicket(
-            String ticketId,
-            String readerId,
-            LocalDate borrowDate,
-            LocalDate dueDate,
-            TicketStatus status,
-            List<BorrowTicketDetail> items) {
+    // Constructor đã được bổ sung kiểm tra chặt chẽ theo cmt của Hạnh
+    public BorrowTicket(String ticketId, String readerId, LocalDate borrowDate,
+                        LocalDate dueDate, LocalDate returnDate, TicketStatus status,
+                        List<BorrowTicketDetail> items) {
 
-        this.ticketId = ticketId;
-        this.readerId = readerId;
+        // 1. Kiểm tra các trường bắt buộc không được null hoặc rỗng
+        if (ticketId == null || ticketId.trim().isEmpty()) {
+            throw new IllegalArgumentException("ticketId không được để trống!");
+        }
+        if (readerId == null || readerId.trim().isEmpty()) {
+            throw new IllegalArgumentException("readerId không được để trống!");
+        }
+        if (borrowDate == null) {
+            throw new IllegalArgumentException("borrowDate không được để trống!");
+        }
+        if (dueDate == null) {
+            throw new IllegalArgumentException("dueDate không được để trống!");
+        }
+        if (items == null || items.isEmpty()) {
+            throw new IllegalArgumentException("Danh sách sách mượn (items) không được null hoặc rỗng!");
+        }
+
+        this.ticketId = ticketId.trim();
+        this.readerId = readerId.trim();
         this.borrowDate = borrowDate;
         this.dueDate = dueDate;
-        this.status = status;
-        this.items = items != null ? items : new ArrayList<>();
+        this.returnDate = returnDate;
+        this.status = status != null ? status : TicketStatus.BORROWING;
+
+        // 2. Lọc các item null trước khi gán
+        this.items = new ArrayList<>();
+        for (BorrowTicketDetail item : items) {
+            if (item != null) {
+                this.items.add(item);
+            }
+        }
+
+        if (this.items.isEmpty()) {
+            throw new IllegalArgumentException("Danh sách chi tiết phiếu mượn không hợp lệ!");
+        }
     }
 
+    /**
+     * Tính tổng số lượng sách trong phiếu.
+     * Đã bổ sung check item khác null theo cmt của Hạnh để tránh NullPointerException.
+     */
+    public int getTotalQuantity() {
+        if (items == null) {
+            return 0;
+        }
+        int total = 0;
+        for (BorrowTicketDetail item : items) {
+            if (item != null) { // Check item khác null
+                total += item.getQuantity();
+            }
+        }
+        return total;
+    }
+
+    // ================= GETTER & SETTER =================
     public String getTicketId() {
         return ticketId;
     }
@@ -66,6 +109,14 @@ public class BorrowTicket {
         this.dueDate = dueDate;
     }
 
+    public LocalDate getReturnDate() {
+        return returnDate;
+    }
+
+    public void setReturnDate(LocalDate returnDate) {
+        this.returnDate = returnDate;
+    }
+
     public TicketStatus getStatus() {
         return status;
     }
@@ -79,17 +130,6 @@ public class BorrowTicket {
     }
 
     public void setItems(List<BorrowTicketDetail> items) {
-        this.items = items != null ? items : new ArrayList<>();
-    }
-
-    public void addItem(BorrowTicketDetail item) {
-        this.items.add(item);
-    }
-
-    public int getTotalQuantity() {
-        return items.stream()
-                .mapToInt(BorrowTicketDetail::getQuantity)
-                .sum();
+        this.items = items;
     }
 }
-

@@ -1,7 +1,6 @@
 package com.group4.library.dto;
 
 import com.group4.library.model.TicketStatus;
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -11,27 +10,14 @@ public class BorrowTicketResponse {
     private String readerId;
     private LocalDate borrowDate;
     private LocalDate dueDate;
+    private LocalDate returnDate;
     private TicketStatus status;
-    private List<BorrowItemRequest> items;
+    private List<BorrowItemResponse> items; // Sửa từ BorrowItemRequest -> BorrowItemResponse
 
     public BorrowTicketResponse() {
     }
 
-    public BorrowTicketResponse(
-            String ticketId,
-            String readerId,
-            LocalDate borrowDate,
-            LocalDate dueDate,
-            TicketStatus status,
-            List<BorrowItemRequest> items) {
-        this.ticketId = ticketId;
-        this.readerId = readerId;
-        this.borrowDate = borrowDate;
-        this.dueDate = dueDate;
-        this.status = status;
-        this.items = items;
-    }
-
+    // Getters & Setters
     public String getTicketId() {
         return ticketId;
     }
@@ -64,6 +50,14 @@ public class BorrowTicketResponse {
         this.dueDate = dueDate;
     }
 
+    public LocalDate getReturnDate() {
+        return returnDate;
+    }
+
+    public void setReturnDate(LocalDate returnDate) {
+        this.returnDate = returnDate;
+    }
+
     public TicketStatus getStatus() {
         return status;
     }
@@ -72,11 +66,11 @@ public class BorrowTicketResponse {
         this.status = status;
     }
 
-    public List<BorrowItemRequest> getItems() {
+    public List<BorrowItemResponse> getItems() {
         return items;
     }
 
-    public void setItems(List<BorrowItemRequest> items) {
+    public void setItems(List<BorrowItemResponse> items) {
         this.items = items;
     }
 }
