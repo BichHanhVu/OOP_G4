@@ -38,7 +38,6 @@ public class ReaderService {
         return toResponse(findOrThrow(id));
     }
 
-    // service/ReaderService.java — chỉ đoạn create() thay đổi
     public ReaderResponse create(ReaderRequest request) {
         validateRequest(request);
 
