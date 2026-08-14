@@ -13,6 +13,7 @@ import com.group4.library.model.TicketStatus;
 import com.group4.library.repository.BookRepository;
 import com.group4.library.repository.BorrowTicketRepository;
 import com.group4.library.repository.ReaderRepository;
+import com.group4.library.exception.OutOfStockException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,6 +62,11 @@ class BorrowServiceTest {
         lenient().when(sampleBook.getBookId()).thenReturn("BK001");
         lenient().when(sampleBook.getAvailableQuantity()).thenReturn(10);
         lenient().when(sampleBook.getTitle()).thenReturn("Lập trình Java");
+        lenient().when(sampleBook.canBorrow(anyInt()))
+                .thenReturn(true);
+
+        lenient().when(bookRepository.update(any(Book.class)))
+                .thenReturn(true);
 
         // 3. Tạo Request mẫu hợp lệ
         BorrowItemRequest item = new BorrowItemRequest("BK001", 1);
@@ -118,12 +124,25 @@ class BorrowServiceTest {
 
     @Test
     void testQuantityZeroOrNegative() {
-        BorrowItemRequest invalidItem = new BorrowItemRequest("BK001", 0);
+        when(readerRepository.findById("R001"))
+                .thenReturn(Optional.of(sampleReader));
+
+        BorrowItemRequest invalidItem =
+                new BorrowItemRequest("BK001", 0);
+
         validRequest.setItems(List.of(invalidItem));
-        assertThrows(InvalidQuantityException.class, () -> borrowService.createBorrowTicket(validRequest));
+
+        assertThrows(
+                InvalidQuantityException.class,
+                () -> borrowService.createBorrowTicket(validRequest)
+        );
 
         invalidItem.setQuantity(-2);
-        assertThrows(InvalidQuantityException.class, () -> borrowService.createBorrowTicket(validRequest));
+
+        assertThrows(
+                InvalidQuantityException.class,
+                () -> borrowService.createBorrowTicket(validRequest)
+        );
     }
 
     @Test
@@ -142,6 +161,13 @@ class BorrowServiceTest {
         assertNotNull(response);
         assertEquals(1, response.getItems().size());
         assertEquals(3, response.getItems().get(0).getQuantity());
+        verify(sampleBook, times(1)).borrow(3);
+
+        verify(bookRepository, times(1))
+                .update(sampleBook);
+
+        verify(bookRepository, never())
+                .save(sampleBook);
     }
 
     @Test
@@ -169,5 +195,54 @@ class BorrowServiceTest {
         List<BorrowTicketResponse> list = borrowService.getAllTickets(null, TicketStatus.BORROWING);
         assertNotNull(list);
         verify(borrowTicketRepository, times(1)).findByStatus(TicketStatus.BORROWING);
+    }
+
+    @Test
+    void testBookNotFound() {
+        when(readerRepository.findById("R001"))
+                .thenReturn(Optional.of(sampleReader));
+
+        when(borrowTicketRepository
+                .findByReaderIdAndStatus(
+                        "R001",
+                        TicketStatus.BORROWING))
+                .thenReturn(Collections.emptyList());
+
+        when(bookRepository.findById("BK001"))
+                .thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> borrowService.createBorrowTicket(validRequest)
+        );
+    }
+
+    @Test
+    void testOutOfStock() {
+        validRequest.setItems(
+                List.of(new BorrowItemRequest("BK001", 2))
+        );
+
+        when(readerRepository.findById("R001"))
+                .thenReturn(Optional.of(sampleReader));
+
+        when(borrowTicketRepository
+                .findByReaderIdAndStatus(
+                        "R001",
+                        TicketStatus.BORROWING))
+                .thenReturn(Collections.emptyList());
+
+        when(bookRepository.findById("BK001"))
+                .thenReturn(Optional.of(sampleBook));
+
+        when(sampleBook.canBorrow(2))
+                .thenReturn(false);
+
+        assertThrows(
+                OutOfStockException.class,
+                () -> borrowService.createBorrowTicket(validRequest)
+        );
+
+        verify(bookRepository, never())
+                .update(any(Book.class));
     }
 }
