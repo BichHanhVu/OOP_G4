@@ -6,6 +6,8 @@ import com.group4.library.exception.BookNotFoundException;
 import com.group4.library.model.Book;
 import com.group4.library.repository.BookRepository;
 import org.springframework.stereotype.Service;
+import com.group4.library.model.TicketStatus;
+import com.group4.library.repository.BorrowTicketRepository;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -20,9 +22,14 @@ import java.util.stream.Collectors;
 @Service
 public class BookService {
     private final BookRepository bookRepository;
+    private final BorrowTicketRepository borrowTicketRepository;
 
-    public BookService(BookRepository bookRepository) {
+    public BookService(
+            BookRepository bookRepository,
+            BorrowTicketRepository borrowTicketRepository
+    ) {
         this.bookRepository = bookRepository;
+        this.borrowTicketRepository = borrowTicketRepository;
     }
 
     public List<BookResponse> getAllBooks() {
@@ -157,7 +164,11 @@ public class BookService {
     }
 
     private boolean isBookCurrentlyBorrowed(String bookCode) {
-        throw new UnsupportedOperationException("Lỗi: Tính năng kiểm tra chưa được code. Để đảm bảo, tạm thời chưa hỗ trợ xóa!");
+        return borrowTicketRepository.findByStatus(TicketStatus.BORROWING)
+                .stream()
+                .filter(ticket -> ticket.getItems() != null)
+                .flatMap(ticket -> ticket.getItems().stream())
+                .anyMatch(item -> bookCode.equalsIgnoreCase(item.getBookId()));
     }
 
     public String exportBooks() {

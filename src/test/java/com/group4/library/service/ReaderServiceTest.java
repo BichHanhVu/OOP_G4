@@ -7,6 +7,9 @@ import com.group4.library.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.group4.library.repository.BorrowTicketRepository;
+import org.mockito.Mockito;
+
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -17,11 +20,17 @@ class ReaderServiceTest {
 
     private ReaderService readerService;
     private InMemoryReaderRepository repository;
+    private BorrowTicketRepository borrowTicketRepository;
 
     @BeforeEach
     void setUp() {
         repository = new InMemoryReaderRepository();
-        readerService = new ReaderService(repository);
+        borrowTicketRepository = Mockito.mock(BorrowTicketRepository.class);
+
+        readerService = new ReaderService(
+                repository,
+                borrowTicketRepository
+        );
     }
 
     @Test
