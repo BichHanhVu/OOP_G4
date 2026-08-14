@@ -1,8 +1,9 @@
+// utils/JsonFileUtils.java
 package com.group4.library.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.CollectionType;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,68 +12,49 @@ import java.util.List;
 
 public class JsonFileUtils {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper()
-            .enable(SerializationFeature.INDENT_OUTPUT);
+    private static final ObjectMapper mapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule());
 
     public static <T> List<T> readList(String filePath, Class<T> clazz) {
-        if (filePath == null || filePath.trim().isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        File file = new File(filePath);
-
         try {
+            File file = new File(filePath);
+
             if (!file.exists()) {
-                createFileIfNotExist(file);
+                // Trường hợp 1: file chưa tồn tại -> tạo thư mục cha + file chứa []
+                createEmptyFile(file);
                 return new ArrayList<>();
             }
 
             if (file.length() == 0) {
+                // Trường hợp 2: file tồn tại nhưng rỗng
                 return new ArrayList<>();
             }
 
-            CollectionType listType = objectMapper.getTypeFactory()
-                    .constructCollectionType(ArrayList.class, clazz);
-
-            List<T> data = objectMapper.readValue(file, listType);
-            return data != null ? data : new ArrayList<>();
-
+            // Trường hợp 3: file có dữ liệu
+            CollectionType listType = mapper.getTypeFactory()
+                    .constructCollectionType(List.class, clazz);
+            return mapper.readValue(file, listType);
         } catch (IOException e) {
-            System.err.println("Lỗi khi đọc file JSON (" + filePath + "): " + e.getMessage());
-            return new ArrayList<>();
+            throw new RuntimeException("Không đọc được file: " + filePath, e);
         }
     }
-
 
     public static <T> void writeList(String filePath, List<T> data) {
-        if (filePath == null || filePath.trim().isEmpty()) {
-            throw new IllegalArgumentException("Lỗi: Đường dẫn file JSON không được null hoặc rỗng!");
-        }
-
-        File file = new File(filePath);
-
         try {
-            createFileIfNotExist(file);
-            objectMapper.writeValue(file, data != null ? data : new ArrayList<>());
+            File file = new File(filePath);
+            if (file.getParentFile() != null) {
+                file.getParentFile().mkdirs();
+            }
+            mapper.writerWithDefaultPrettyPrinter().writeValue(file, data);
         } catch (IOException e) {
-            throw new RuntimeException("Lỗi: Không thể ghi dữ liệu vào file JSON (" + filePath + ")", e);
+            throw new RuntimeException("Không ghi được file: " + filePath, e);
         }
     }
 
-
-    private static void createFileIfNotExist(File file) throws IOException {
-        if (file.getParentFile() != null && !file.getParentFile().exists()) {
-            boolean dirsCreated = file.getParentFile().mkdirs();
-            if (!dirsCreated && !file.getParentFile().exists()) {
-                throw new IOException("Không thể tạo thư mục chứa file: " + file.getParentFile().getAbsolutePath());
-            }
+    private static void createEmptyFile(File file) throws IOException {
+        if (file.getParentFile() != null) {
+            file.getParentFile().mkdirs();
         }
-
-        if (!file.exists()) {
-            boolean created = file.createNewFile();
-            if (created) {
-                objectMapper.writeValue(file, new ArrayList<>());
-            }
-        }
+        mapper.writerWithDefaultPrettyPrinter().writeValue(file, new ArrayList<>());
     }
 }

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head><meta charset="UTF-8"><title>Trả sách</title><link rel="stylesheet" href="../css/style.css"></head>
+<body>
+<nav><a href="/">Trang chủ</a> | <a href="history.html">Lịch sử trả</a></nav>
+<h1>Trả sách</h1>
+<div id="message"></div>
+<form id="returnForm">
+  <label>Mã phiếu mượn <input id="ticketId" required></label>
+  <label>Ngày trả thực tế <input id="actualReturnDate" type="date" required></label>
+  <button type="submit">Xác nhận trả sách</button>
+</form>
+<section id="result" hidden>
+  <h2>Kết quả</h2>
+  <p>Số ngày trễ: <strong id="lateDays"></strong></p>
+  <p>Tiền phạt: <strong id="fineAmount"></strong></p>
+</section>
+<script src="../js/api.js"></script><script src="../js/return.js"></script>
+</body></html>
