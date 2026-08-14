@@ -6,7 +6,6 @@
       <excludeFolder url="file://$MODULE_DIR$/src/test" />
       <excludeFolder url="file://$MODULE_DIR$/src/test/java" />
       <excludeFolder url="file://$MODULE_DIR$/src/com/group4/library" />
-      <excludeFolder url="file://$MODULE_DIR$/src/main/java/com/group4/library/repository/json/JsonReaderRepository.java" />
     </content>
   </component>
 </module>
