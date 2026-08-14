@@ -5,17 +5,9 @@ import com.group4.library.dto.BookResponse;
 import com.group4.library.exception.BookNotFoundException;
 import com.group4.library.model.Book;
 import com.group4.library.repository.BookRepository;
+import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+@Service
 public class BookService {
     private final BookRepository bookRepository;
 
@@ -81,6 +73,7 @@ public class BookService {
         existingBook.setTitle(request.getTitle().trim());
         existingBook.setAuthor(request.getAuthor() != null ? request.getAuthor().trim() : "");
         existingBook.setGenre(request.getGenre() != null ? request.getGenre().trim() : "");
+        existingBook.setAvailableQuantity(request.getAvailableQuantity());
         existingBook.setPrice(request.getPrice());
 
         boolean updated = bookRepository.update(existingBook);

@@ -8,17 +8,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class JsonBookRepository implements BookRepository {
-    private final String filePath;
+    private static final String FILE_PATH = "data/books.json";
 
-    public JsonBookRepository(String filePath) {
-        this.filePath = filePath;
+    public JsonBookRepository() {
     }
 
     @Override
     public List<Book> findAll() {
-        return JsonFileUtils.readList(filePath, Book.class);
+        return JsonFileUtils.readList(FILE_PATH, Book.class);
     }
 
     @Override
@@ -65,7 +66,7 @@ public class JsonBookRepository implements BookRepository {
 
         List<Book> books = findAll();
         books.add(book);
-        JsonFileUtils.writeList(filePath, books);
+        JsonFileUtils.writeList(FILE_PATH, books);
     }
 
     @Override
@@ -87,7 +88,7 @@ public class JsonBookRepository implements BookRepository {
         }
 
         if (found) {
-            JsonFileUtils.writeList(filePath, books);
+            JsonFileUtils.writeList(FILE_PATH, books);
         }
 
         return found;
@@ -103,7 +104,7 @@ public class JsonBookRepository implements BookRepository {
         boolean removed = books.removeIf(book -> book != null && code.equalsIgnoreCase(book.getBookId()));
 
         if (removed) {
-            JsonFileUtils.writeList(filePath, books);
+            JsonFileUtils.writeList(FILE_PATH, books);
         }
 
         return removed;
