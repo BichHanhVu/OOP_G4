@@ -1,0 +1,20 @@
+[
+  {
+    "id": "R001",
+    "name": "Nguyễn Văn A",
+    "phoneNumber": "0912345678",
+    "type": "STUDENT"
+  },
+  {
+    "id": "R002",
+    "name": "Trần Thị B",
+    "phoneNumber": "0987654321",
+    "type": "PRIORITY_STUDENT"
+  },
+  {
+    "id": "R003",
+    "name": "Lê Văn C",
+    "phoneNumber": "0901112223",
+    "type": "LECTURER"
+  }
+]
