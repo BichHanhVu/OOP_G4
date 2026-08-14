@@ -1,3 +1,4 @@
+// utils/JsonFileUtils.java
 package com.group4.library.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,9 +18,19 @@ public class JsonFileUtils {
     public static <T> List<T> readList(String filePath, Class<T> clazz) {
         try {
             File file = new File(filePath);
-            if (!file.exists() || file.length() == 0) {
+
+            if (!file.exists()) {
+                // Trường hợp 1: file chưa tồn tại -> tạo thư mục cha + file chứa []
+                createEmptyFile(file);
                 return new ArrayList<>();
             }
+
+            if (file.length() == 0) {
+                // Trường hợp 2: file tồn tại nhưng rỗng
+                return new ArrayList<>();
+            }
+
+            // Trường hợp 3: file có dữ liệu
             CollectionType listType = mapper.getTypeFactory()
                     .constructCollectionType(List.class, clazz);
             return mapper.readValue(file, listType);
@@ -38,5 +49,12 @@ public class JsonFileUtils {
         } catch (IOException e) {
             throw new RuntimeException("Không ghi được file: " + filePath, e);
         }
+    }
+
+    private static void createEmptyFile(File file) throws IOException {
+        if (file.getParentFile() != null) {
+            file.getParentFile().mkdirs();
+        }
+        mapper.writerWithDefaultPrettyPrinter().writeValue(file, new ArrayList<>());
     }
 }

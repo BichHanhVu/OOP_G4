@@ -3,6 +3,7 @@ package com.group4.library.handler;
 import com.group4.library.dto.ReaderRequest;
 import com.group4.library.dto.ReaderResponse;
 import com.group4.library.service.ReaderService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -39,13 +40,15 @@ public class ReaderHandler {
         return ResponseEntity.ok(readerService.getById(id));
     }
 
+    // handler/ReaderHandler.java — chỉ 2 method thay đổi
     @PostMapping
-    public ResponseEntity<ReaderResponse> create(@RequestBody ReaderRequest request) {
+    public ResponseEntity<ReaderResponse> create(@Valid @RequestBody ReaderRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(readerService.create(request));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ReaderResponse> update(@PathVariable String id, @RequestBody ReaderRequest request) {
+    public ResponseEntity<ReaderResponse> update(@PathVariable String id,
+                                                 @Valid @RequestBody ReaderRequest request) {
         return ResponseEntity.ok(readerService.update(id, request));
     }
 
