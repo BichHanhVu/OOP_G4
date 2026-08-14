@@ -1,19 +1,26 @@
 package com.group4.library.service;
 
+import com.group4.library.exception.InvalidQuantityException;
+import com.group4.library.exception.InvalidBorrowDateException;
+import com.group4.library.exception.BorrowLimitExceededException;
+
 import com.group4.library.dto.BorrowItemRequest;
 import com.group4.library.dto.BorrowItemResponse;
 import com.group4.library.dto.BorrowRequest;
 import com.group4.library.dto.BorrowTicketResponse;
-import com.group4.library.exception.*;
+
 import com.group4.library.model.BorrowTicket;
 import com.group4.library.model.BorrowTicketDetail;
 import com.group4.library.model.TicketStatus;
+
 import com.group4.library.repository.BorrowTicketRepository;
+
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class BorrowService {
@@ -98,10 +105,10 @@ public class BorrowService {
                 request.getReaderId().trim(), TicketStatus.BORROWING
         );
 
-        // Đã bổ sung check null-safe tránh crash app
+        // Đã bổ sung check null-safe tránh crash app (Thay null bằng Stream.empty())
         int currentBorrowingCount = activeTickets.stream()
                 .filter(Objects::nonNull)
-                .flatMap(t -> t.getItems() != null ? t.getItems().stream() : null)
+                .flatMap(t -> t.getItems() != null ? t.getItems().stream() : Stream.empty())
                 .filter(Objects::nonNull)
                 .mapToInt(BorrowTicketDetail::getQuantity)
                 .sum();

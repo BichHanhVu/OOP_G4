@@ -1,11 +1,11 @@
-package com.group4.library;
+package main;
 
 import com.group4.library.dto.BorrowItemRequest;
 import com.group4.library.dto.BorrowRequest;
 import com.group4.library.dto.BorrowTicketResponse;
-import com.group4.library.repository.BorrowTicketRepository;
-import com.group4.library.repository.json.JsonBorrowTicketRepository;
-import com.group4.library.service.BorrowService;
+import main.java.com.group4.library.repository.BorrowTicketRepository;
+import main.java.com.group4.library.repository.json.JsonBorrowTicketRepository;
+import main.java.com.group4.library.service.BorrowService;
 
 import java.time.LocalDate;
 import java.util.List;

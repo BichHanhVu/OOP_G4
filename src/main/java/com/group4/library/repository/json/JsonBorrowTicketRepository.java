@@ -1,12 +1,12 @@
-package com.group4.library.repository.json;
-import com.group4.library.repository.BorrowTicketRepository;
+package main.java.com.group4.library.repository.json;
 
 
-import com.group4.library.model.BorrowTicket;
-import com.group4.library.model.TicketStatus;
+import main.java.com.group4.library.model.BorrowTicket;
+import main.java.com.group4.library.model.TicketStatus;
 // // Code của Tiệp: Import class tiện ích đọc/ghi JSON dùng chung
 // import com.group4.library.util.JsonFileUtils;
 
+import main.java.com.group4.library.repository.BorrowTicketRepository;
 import org.springframework.stereotype.Repository;
 
 import java.io.File;

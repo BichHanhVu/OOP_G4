@@ -2,11 +2,27 @@
 <module version="4">
   <component name="AdditionalModuleElements">
     <content url="file://$MODULE_DIR$" dumb="true">
-      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
-      <excludeFolder url="file://$MODULE_DIR$/src/main" />
       <excludeFolder url="file://$MODULE_DIR$/src/main/resources" />
       <excludeFolder url="file://$MODULE_DIR$/src/test" />
       <excludeFolder url="file://$MODULE_DIR$/src/test/java" />
+      <excludeFolder url="file://$MODULE_DIR$/src/com/group4/library" />
+      <excludeFolder url="file://$MODULE_DIR$/src/main/java/com/group4/library/dto/ErrorResponse.java" />
+      <excludeFolder url="file://$MODULE_DIR$/src/main/java/com/group4/library/dto/ReaderRequest.java" />
+      <excludeFolder url="file://$MODULE_DIR$/src/main/java/com/group4/library/dto/ReaderResponse.java" />
+      <excludeFolder url="file://$MODULE_DIR$/src/main/java/com/group4/library/exception/BusinessException.java" />
+      <excludeFolder url="file://$MODULE_DIR$/src/main/java/com/group4/library/exception/GlobalExceptionHandler.java" />
+      <excludeFolder url="file://$MODULE_DIR$/src/main/java/com/group4/library/exception/ResourceNotFoundException.java" />
+      <excludeFolder url="file://$MODULE_DIR$/src/main/java/com/group4/library/handler/ReaderHandler.java" />
+      <excludeFolder url="file://$MODULE_DIR$/src/main/java/com/group4/library/model/Book.java" />
+      <excludeFolder url="file://$MODULE_DIR$/src/main/java/com/group4/library/model/LecturerReader.java" />
+      <excludeFolder url="file://$MODULE_DIR$/src/main/java/com/group4/library/model/PriorityStudentReader.java" />
+      <excludeFolder url="file://$MODULE_DIR$/src/main/java/com/group4/library/model/Reader.java" />
+      <excludeFolder url="file://$MODULE_DIR$/src/main/java/com/group4/library/model/ReaderType.java" />
+      <excludeFolder url="file://$MODULE_DIR$/src/main/java/com/group4/library/model/StudentReader.java" />
+      <excludeFolder url="file://$MODULE_DIR$/src/main/java/com/group4/library/model/User.java" />
+      <excludeFolder url="file://$MODULE_DIR$/src/main/java/com/group4/library/repository/ReaderRepository.java" />
+      <excludeFolder url="file://$MODULE_DIR$/src/main/java/com/group4/library/repository/json/JsonReaderRepository.java" />
+      <excludeFolder url="file://$MODULE_DIR$/src/main/java/com/group4/library/service/ReaderService.java" />
     </content>
   </component>
 </module>
