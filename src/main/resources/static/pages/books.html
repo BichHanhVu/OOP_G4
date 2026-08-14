@@ -10,10 +10,18 @@
 
 <div class="container my-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 class="fw-bold text-primary mb-0">Quản Lý Thư Viện Sách</h3>
-        <button class="btn btn-primary" onclick="openAddModal()">
-            + Thêm sách mới
-        </button>
+        <h3 class="fw-bold text-primary mb-0">Quản Lý Sách</h3>
+        <div class="d-flex gap-2">
+            <a href="/api/books/export" class="btn btn-outline-success">
+                Xuất file
+            </a>
+            <label class="btn btn-outline-primary mb-0">
+                Nhập file <input type="file" id="importFileInput" accept=".csv" onchange="importBooks(event)" hidden>
+            </label>
+            <button class="btn btn-primary" onclick="openAddModal()">
+                + Thêm sách mới
+            </button>
+        </div>
     </div>
 
     <div class="card p-3 shadow-sm mb-4">
@@ -24,9 +32,6 @@
             <div class="col-md-3">
                 <select class="form-select" id="genreFilter" onchange="fetchAndRenderBooks()">
                     <option value="">Tất cả thể loại</option>
-                    <option value="Công nghệ">Công nghệ</option>
-                    <option value="Văn học">Văn học</option>
-                    <option value="Kinh tế">Kinh tế</option>
                 </select>
             </div>
             <div class="col-md-3">
@@ -73,8 +78,8 @@
                     <input type="hidden" id="isEditMode" value="false">
 
                     <div class="mb-3">
-                        <label for="bookCode" class="form-label">Mã sách</label>
-                        <input type="text" class="form-control" id="bookCode" required>
+                        <label for="bookId" class="form-label">Mã sách</label>
+                        <input type="text" class="form-control" id="bookId" required>
                     </div>
                     <div class="mb-3">
                         <label for="bookTitle" class="form-label">Tên sách</label>
@@ -86,11 +91,8 @@
                     </div>
                     <div class="mb-3">
                         <label for="bookGenre" class="form-label">Thể loại</label>
-                        <select class="form-select" id="bookGenre" required>
-                            <option value="Công nghệ">Công nghệ</option>
-                            <option value="Văn học">Văn học</option>
-                            <option value="Kinh tế">Kinh tế</option>
-                        </select>
+                        <input type="text" class="form-control" id="bookGenre" list="genreOptions" placeholder="Chọn hoặc nhập thể loại mới..." required>
+                        <datalist id="genreOptions"></datalist>
                     </div>
                     <div class="mb-3">
                         <label for="bookQuantity" class="form-label">Số lượng hiện có</label>

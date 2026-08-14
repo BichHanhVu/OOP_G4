@@ -2,24 +2,49 @@ let bookModal;
 let allBooks = [];
 
 document.addEventListener("DOMContentLoaded", () => {
-    bookModal = new bootstrap.Modal(document.getElementById('bookModal'));
+    const modalElement = document.getElementById('bookModal');
+    if (modalElement) {
+        bookModal = new bootstrap.Modal(modalElement);
+    }
     fetchAndRenderBooks();
 });
+
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
 
 async function fetchAndRenderBooks() {
     try {
         const response = await fetch('/api/books');
-        if (!response.ok) throw new Error('Không thể tải danh sách sách!');
+        if (!response.ok) {
+            let errorMsg = 'Không thể tải danh sách sách!';
+            try {
+                const error = await response.json();
+                errorMsg = error.message || errorMsg;
+            } catch (e) {}
+            throw new Error(errorMsg);
+        }
 
         allBooks = await response.json();
 
-        const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
-        const selectedGenre = document.getElementById('genreFilter').value;
-        const selectedStatus = document.getElementById('statusFilter').value;
+        updateGenreDropdowns(allBooks);
+
+        const searchQuery = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
+        const selectedGenre = document.getElementById('genreFilter')?.value || '';
+        const selectedStatus = document.getElementById('statusFilter')?.value || '';
 
         const filteredBooks = allBooks.filter(book => {
-            const matchesSearch = book.code.toLowerCase().includes(searchQuery) ||
-                book.title.toLowerCase().includes(searchQuery);
+            const bookId = book.bookId || '';
+            const title = book.title || '';
+            const matchesSearch = bookId.toLowerCase().includes(searchQuery) ||
+                                  title.toLowerCase().includes(searchQuery);
+
             const matchesGenre = selectedGenre === "" || book.genre === selectedGenre;
 
             let matchesStatus = true;
@@ -32,14 +57,57 @@ async function fetchAndRenderBooks() {
         renderBookTable(filteredBooks);
     } catch (error) {
         console.error("Lỗi:", error);
+        showTableError(error.message);
     }
+}
+
+function updateGenreDropdowns(books) {
+    const genreFilter = document.getElementById('genreFilter');
+    const genreDatalist = document.getElementById('genreOptions');
+    if (!genreFilter || !genreDatalist) return;
+
+    const currentSelectedGenre = genreFilter.value;
+
+    const genres = [...new Set(books.map(b => b.genre).filter(g => g && g.trim() !== ''))].sort();
+
+    genreFilter.innerHTML = '<option value="">Tất cả thể loại</option>';
+    genres.forEach(genre => {
+        const option = document.createElement('option');
+        option.value = genre;
+        option.textContent = genre;
+        if (genre === currentSelectedGenre) {
+            option.selected = true;
+        }
+        genreFilter.appendChild(option);
+    });
+
+    genreDatalist.innerHTML = '';
+    genres.forEach(genre => {
+        const option = document.createElement('option');
+        option.value = genre;
+        genreDatalist.appendChild(option);
+    });
+}
+
+function showTableError(message) {
+    const tableBody = document.getElementById('bookTableBody');
+    if (!tableBody) return;
+    tableBody.innerHTML = `
+        <tr>
+            <td colspan="8" class="text-center text-danger py-4">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <strong>Đã xảy ra lỗi:</strong> ${escapeHtml(message)}
+            </td>
+        </tr>`;
 }
 
 function renderBookTable(books) {
     const tableBody = document.getElementById('bookTableBody');
+    if (!tableBody) return;
+
     tableBody.innerHTML = '';
 
-    if (books.length === 0) {
+    if (!books || books.length === 0) {
         tableBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted">Không tìm thấy sách nào!</td></tr>`;
         return;
     }
@@ -51,19 +119,26 @@ function renderBookTable(books) {
             ? `<span class="badge bg-success">Còn sách</span>`
             : `<span class="badge bg-danger">Hết sách</span>`;
 
+        const safeBookId = escapeHtml(book.bookId);
+        const safeTitle = escapeHtml(book.title);
+        const safeAuthor = escapeHtml(book.author);
+        const safeGenre = escapeHtml(book.genre);
+        const quantity = Number.isInteger(book.availableQuantity) ? book.availableQuantity : 0;
+        const priceFormatted = book.price ? book.price.toLocaleString('vi-VN') : 0;
+
         row.innerHTML = `
-            <td><strong>${book.code}</strong></td>
-            <td>${book.title}</td>
-            <td>${book.author}</td>
-            <td>${book.genre}</td>
-            <td>${book.availableQuantity}</td>
-            <td>${book.price ? book.price.toLocaleString('vi-VN') : 0} đ</td>
+            <td><strong>${safeBookId}</strong></td>
+            <td>${safeTitle}</td>
+            <td>${safeAuthor}</td>
+            <td>${safeGenre}</td>
+            <td>${quantity}</td>
+            <td>${priceFormatted} đ</td>
             <td>${statusBadge}</td>
             <td class="text-center">
-                <button class="btn btn-warning" onclick="openEditModal('${book.code}')">
+                <button class="btn btn-sm btn-outline-warning me-1" onclick="openEditModal('${safeBookId}')">
                     Cập nhật
                 </button>
-                <button class="btn btn-danger" onclick="deleteBook('${book.code}')">
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteBook('${safeBookId}')">
                     Xóa
                 </button>
             </td>
@@ -77,43 +152,45 @@ function openAddModal() {
     document.getElementById('bookModalLabel').innerText = "Thêm sách mới";
 
     document.getElementById('bookForm').reset();
-    document.getElementById('bookCode').disabled = false;
+    document.getElementById('bookId').disabled = false;
 
-    bookModal.show();
+    if (bookModal) bookModal.show();
 }
 
-function openEditModal(code) {
-    const book = allBooks.find(b => b.code === code);
+function openEditModal(bookId) {
+    const book = allBooks.find(b => b.bookId === bookId);
     if (!book) return;
 
     document.getElementById('isEditMode').value = "true";
     document.getElementById('bookModalLabel').innerText = "Cập nhật thông tin sách";
 
-    document.getElementById('bookCode').value = book.code;
-    document.getElementById('bookCode').disabled = true;
-    document.getElementById('bookTitle').value = book.title;
-    document.getElementById('bookAuthor').value = book.author;
-    document.getElementById('bookGenre').value = book.genre;
-    document.getElementById('bookQuantity').value = book.availableQuantity;
-    document.getElementById('bookPrice').value = book.price;
+    document.getElementById('bookId').value = book.bookId;
+    document.getElementById('bookId').disabled = true;
+    document.getElementById('bookTitle').value = book.title || '';
+    document.getElementById('bookAuthor').value = book.author || '';
+    document.getElementById('bookGenre').value = book.genre || '';
+    document.getElementById('bookQuantity').value = book.availableQuantity ?? 0;
+    document.getElementById('bookPrice').value = book.price ?? 0;
 
-    bookModal.show();
+    if (bookModal) bookModal.show();
 }
 
 async function saveBook(event) {
     event.preventDefault();
 
     const isEdit = document.getElementById('isEditMode').value === "true";
+    const bookId = document.getElementById('bookId').value.trim();
+
     const bookData = {
-        code: document.getElementById('bookCode').value,
-        title: document.getElementById('bookTitle').value,
-        author: document.getElementById('bookAuthor').value,
-        genre: document.getElementById('bookGenre').value,
-        availableQuantity: parseInt(document.getElementById('bookQuantity').value),
-        price: parseFloat(document.getElementById('bookPrice').value)
+        bookId: bookId,
+        title: document.getElementById('bookTitle').value.trim(),
+        author: document.getElementById('bookAuthor').value.trim(),
+        genre: document.getElementById('bookGenre').value.trim(),
+        availableQuantity: parseInt(document.getElementById('bookQuantity').value) || 0,
+        price: parseFloat(document.getElementById('bookPrice').value) || 0
     };
 
-    const url = '/api/books';
+    const url = isEdit ? `/api/books/${encodeURIComponent(bookId)}` : '/api/books';
     const method = isEdit ? 'PUT' : 'POST';
 
     try {
@@ -124,35 +201,68 @@ async function saveBook(event) {
         });
 
         if (!response.ok) {
-            const errorMsg = await response.text();
-            throw new Error(errorMsg || 'Thao tác thất bại!');
+            const error = await response.json();
+            throw new Error(error.message || 'Thao tác thất bại!');
         }
 
-        bookModal.hide();
+        if (bookModal) bookModal.hide();
         fetchAndRenderBooks();
     } catch (error) {
         alert(error.message);
     }
 }
 
-async function deleteBook(code) {
-    if (!confirm(`Bạn có chắc chắn muốn xóa sách có mã '${code}' không?`)) {
+async function deleteBook(bookId) {
+    if (!confirm(`Bạn có chắc chắn muốn xóa sách có mã '${bookId}' không?`)) {
         return;
     }
 
     try {
-        const response = await fetch(`/api/books?code=${encodeURIComponent(code)}`, {
+        const response = await fetch(`/api/books/${encodeURIComponent(bookId)}`, {
             method: 'DELETE'
         });
 
         if (!response.ok) {
-            const errorMsg = await response.text();
-            throw new Error(errorMsg || 'Xóa sách thất bại!');
+            const error = await response.json();
+            throw new Error(error.message || 'Xóa sách thất bại!');
         }
 
         alert('Xóa sách thành công!');
         fetchAndRenderBooks();
     } catch (error) {
         alert(error.message);
+    }
+}
+
+async function importBooks(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!confirm(`Xác nhận nhập dữ liệu từ file '${file.name}'?`)) {
+        event.target.value = '';
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+        const response = await fetch('/api/books/import', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Nhập dữ liệu thất bại!');
+        }
+
+        const resultText = await response.text();
+        alert(resultText);
+        fetchAndRenderBooks();
+    } catch (error) {
+        alert(error.message);
+    } finally {
+        event.target.value = '';
     }
 }
