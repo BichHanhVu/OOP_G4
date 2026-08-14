@@ -1,0 +1,22 @@
+[ {
+  "bookId" : "BK001",
+  "title" : "Lập Trình Java Căn Bản 123",
+  "author" : "Nguyễn Văn An",
+  "genre" : "Công nghệ",
+  "availableQuantity" : 10,
+  "price" : 120000
+}, {
+  "bookId" : "BK002",
+  "title" : "Cấu Trúc Dữ Liệu & Giải Thuật",
+  "author" : "Trần Thị Bình",
+  "genre" : "Công nghệ",
+  "availableQuantity" : 5,
+  "price" : 150000
+}, {
+  "bookId" : "BK003",
+  "title" : "Đắc Nhân Tâm",
+  "author" : "Dale Carnegie",
+  "genre" : "Văn học",
+  "availableQuantity" : 0,
+  "price" : 98000
+} ]
