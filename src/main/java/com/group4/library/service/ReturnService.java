@@ -80,6 +80,7 @@ public class ReturnService {
             bookRepository.update(update.book());
         }
 
+        ticket.setReturnDate(request.getActualReturnDate());
         ticket.setStatus(TicketStatus.RETURNED);
         ticketRepository.save(ticket);
 
@@ -111,7 +112,7 @@ public class ReturnService {
             if (item.getQuantity() <= 0) {
                 throw new BusinessException("Số lượng sách trong phiếu phải lớn hơn 0");
             }
-            Book book = bookRepository.findByCode(item.getBookId())
+            Book book = bookRepository.findById(item.getBookId())
                     .orElseThrow(() -> new ResourceNotFoundException(
                             "Không tìm thấy sách: " + item.getBookId()));
             updates.add(new BookUpdate(book, item.getQuantity()));

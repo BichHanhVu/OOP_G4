@@ -30,7 +30,7 @@ class ReturnServiceTest {
         service = new ReturnService(readers, books, tickets, returns, new FinePolicyFactory());
 
         readers.save(new StudentReader("R001", "Nguyễn Văn A", "0912345678"));
-        books.save(new Book("B001", "Java", "Tác giả", "Công nghệ", 2, 100_000));
+        books.save(new Book("B001", "Java", "Tác giả", "Công nghệ", 2, 100000L));
         tickets.save(new BorrowTicket("BT001", "R001", LocalDate.of(2026, 8, 1),
                 LocalDate.of(2026, 8, 10), TicketStatus.BORROWING,
                 List.of(new BorrowTicketDetail("B001", 2))));
@@ -43,9 +43,10 @@ class ReturnServiceTest {
 
         assertEquals(3, response.getLateDays());
         assertEquals(15_000L, response.getFineAmount());
-        assertEquals(4, books.findByCode("B001").orElseThrow().getAvailableQuantity());
+        assertEquals(4, books.findById("B001").orElseThrow().getAvailableQuantity());
         assertEquals(TicketStatus.RETURNED, tickets.findById("BT001").orElseThrow().getStatus());
         assertEquals(1, returns.findAll().size());
+        assertEquals(actualReturnDate, tickets.findById("BT001").orElseThrow().getReturnDate());
     }
 
     @Test
@@ -63,35 +64,52 @@ class ReturnServiceTest {
                 () -> service.returnBooks(new ReturnRequest("BT001", LocalDate.of(2026, 8, 11))));
     }
 
-    private static class MemoryReaderRepository implements ReaderRepository {
-        private final Map<String, Reader> data = new HashMap<>();
-        public List<Reader> findAll() { return new ArrayList<>(data.values()); }
-        public Optional<Reader> findById(String id) { return Optional.ofNullable(data.get(id)); }
-        public Reader save(Reader reader) { data.put(reader.getId(), reader); return reader; }
-        public void deleteById(String id) { data.remove(id); }
-        public boolean existsById(String id) { return data.containsKey(id); }
-    }
+    private static class MemoryTicketRepository
+            implements BorrowTicketRepository {
 
-    private static class MemoryBookRepository implements BookRepository {
-        private final Map<String, Book> data = new HashMap<>();
-        public List<Book> findAll() { return new ArrayList<>(data.values()); }
-        public Optional<Book> findByCode(String code) { return Optional.ofNullable(data.get(code)); }
-        public void save(Book book) { data.put(book.getCode(), book); }
-        public void update(Book book) { data.put(book.getCode(), book); }
-        public void deleteByCode(String code) { data.remove(code); }
-    }
-
-    private static class MemoryTicketRepository implements BorrowTicketRepository {
         private final Map<String, BorrowTicket> data = new HashMap<>();
-        public List<BorrowTicket> findAll() { return new ArrayList<>(data.values()); }
-        public Optional<BorrowTicket> findById(String id) { return Optional.ofNullable(data.get(id)); }
-        public BorrowTicket save(BorrowTicket ticket) { data.put(ticket.getTicketId(), ticket); return ticket; }
-    }
 
-    private static class MemoryReturnRepository implements ReturnRecordRepository {
-        private final Map<String, ReturnRecord> data = new LinkedHashMap<>();
-        public List<ReturnRecord> findAll() { return new ArrayList<>(data.values()); }
-        public Optional<ReturnRecord> findById(String id) { return Optional.ofNullable(data.get(id)); }
-        public ReturnRecord save(ReturnRecord record) { data.put(record.getReturnId(), record); return record; }
+        @Override
+        public List<BorrowTicket> findAll() {
+            return new ArrayList<>(data.values());
+        }
+
+        @Override
+        public Optional<BorrowTicket> findById(String id) {
+            return Optional.ofNullable(data.get(id));
+        }
+
+        @Override
+        public BorrowTicket save(BorrowTicket ticket) {
+            data.put(ticket.getTicketId(), ticket);
+            return ticket;
+        }
+
+        @Override
+        public List<BorrowTicket> findByReaderId(String readerId) {
+            return data.values().stream()
+                    .filter(ticket ->
+                            readerId.equalsIgnoreCase(ticket.getReaderId()))
+                    .toList();
+        }
+
+        @Override
+        public List<BorrowTicket> findByStatus(TicketStatus status) {
+            return data.values().stream()
+                    .filter(ticket -> ticket.getStatus() == status)
+                    .toList();
+        }
+
+        @Override
+        public List<BorrowTicket> findByReaderIdAndStatus(
+                String readerId,
+                TicketStatus status) {
+
+            return data.values().stream()
+                    .filter(ticket ->
+                            readerId.equalsIgnoreCase(ticket.getReaderId()))
+                    .filter(ticket -> ticket.getStatus() == status)
+                    .toList();
+        }
     }
 }
