@@ -31,15 +31,17 @@ class ReturnServiceTest {
 
         readers.save(new StudentReader("R001", "Nguyễn Văn A", "0912345678"));
         books.save(new Book("B001", "Java", "Tác giả", "Công nghệ", 2, 100000L));
+
+        // Cập nhật constructor BorrowTicketDetail truyền đủ 4 tham số: (detailId, ticketId, bookId, quantity)
         tickets.save(new BorrowTicket("BT001", "R001", LocalDate.of(2026, 8, 1),
-                LocalDate.of(2026, 8, 10), TicketStatus.BORROWING,
-                List.of(new BorrowTicketDetail("B001", 2))));
+                LocalDate.of(2026, 8, 10), null, TicketStatus.BORROWING,
+                List.of(new BorrowTicketDetail("TD001", "BT001", "B001", 2))));
     }
 
     @Test
     void traQuaHan_tinhPhiVaHoanKhoDung() {
-        ReturnResponse response = service.returnBooks(
-                new ReturnRequest("BT001", LocalDate.of(2026, 8, 13)));
+        LocalDate actualReturnDate = LocalDate.of(2026, 8, 13);
+        ReturnResponse response = service.returnBooks(new ReturnRequest("BT001", actualReturnDate));
 
         assertEquals(3, response.getLateDays());
         assertEquals(15_000L, response.getFineAmount());
@@ -64,9 +66,9 @@ class ReturnServiceTest {
                 () -> service.returnBooks(new ReturnRequest("BT001", LocalDate.of(2026, 8, 11))));
     }
 
-    private static class MemoryTicketRepository
-            implements BorrowTicketRepository {
+    // --- Fake Memory Repositories chuẩn khớp Interface ---
 
+    private static class MemoryTicketRepository implements BorrowTicketRepository {
         private final Map<String, BorrowTicket> data = new HashMap<>();
 
         @Override
@@ -88,8 +90,7 @@ class ReturnServiceTest {
         @Override
         public List<BorrowTicket> findByReaderId(String readerId) {
             return data.values().stream()
-                    .filter(ticket ->
-                            readerId.equalsIgnoreCase(ticket.getReaderId()))
+                    .filter(ticket -> readerId.equalsIgnoreCase(ticket.getReaderId()))
                     .toList();
         }
 
@@ -101,15 +102,106 @@ class ReturnServiceTest {
         }
 
         @Override
-        public List<BorrowTicket> findByReaderIdAndStatus(
-                String readerId,
-                TicketStatus status) {
-
+        public List<BorrowTicket> findByReaderIdAndStatus(String readerId, TicketStatus status) {
             return data.values().stream()
-                    .filter(ticket ->
-                            readerId.equalsIgnoreCase(ticket.getReaderId()))
+                    .filter(ticket -> readerId.equalsIgnoreCase(ticket.getReaderId()))
                     .filter(ticket -> ticket.getStatus() == status)
                     .toList();
+        }
+    }
+
+    private static class MemoryReaderRepository implements ReaderRepository {
+        private final Map<String, Reader> data = new HashMap<>();
+
+        @Override
+        public Optional<Reader> findById(String id) {
+            return Optional.ofNullable(data.get(id));
+        }
+
+        @Override
+        public Reader save(Reader reader) {
+            data.put(reader.getId(), reader); // Đổi reader.getReaderId() -> reader.getId()
+            return reader;
+        }
+
+        @Override
+        public List<Reader> findAll() {
+            return new ArrayList<>(data.values());
+        }
+
+        @Override
+        public boolean existsById(String id) {
+            return data.containsKey(id);
+        }
+
+        @Override
+        public void deleteById(String id) { // Đổi kiếu trả về void khớp với ReaderRepository
+            data.remove(id);
+        }
+    }
+
+    private static class MemoryBookRepository implements BookRepository {
+        private final Map<String, Book> data = new HashMap<>();
+
+        @Override
+        public Optional<Book> findById(String id) {
+            return Optional.ofNullable(data.get(id));
+        }
+
+        @Override
+        public void save(Book book) { // Đổi kiểu trả về void khớp với BookRepository
+            data.put(book.getBookId(), book);
+        }
+
+        @Override
+        public List<Book> findAll() {
+            return new ArrayList<>(data.values());
+        }
+
+        @Override
+        public boolean update(Book book) {
+            data.put(book.getBookId(), book);
+            return true;
+        }
+
+        @Override
+        public boolean deleteByCode(String code) {
+            return data.remove(code) != null;
+        }
+
+        @Override
+        public List<Book> searchByIdOrTitle(String keyword) {
+            return data.values().stream()
+                    .filter(b -> b.getBookId().contains(keyword) || b.getTitle().contains(keyword))
+                    .toList();
+        }
+
+        @Override
+        public List<Book> findByTitleContaining(String title) {
+            if (title == null) return Collections.emptyList();
+            return data.values().stream()
+                    .filter(b -> b.getTitle() != null && b.getTitle().toLowerCase().contains(title.toLowerCase()))
+                    .toList();
+        }
+    }
+
+    private static class MemoryReturnRepository implements ReturnRecordRepository {
+        private final Map<String, ReturnRecord> data = new HashMap<>();
+
+        @Override
+        public ReturnRecord save(ReturnRecord record) {
+            data.put(record.getReturnId(), record);
+            return record;
+        }
+
+        @Override
+        public List<ReturnRecord> findAll() {
+            return new ArrayList<>(data.values());
+        }
+
+        @Override
+        public Optional<ReturnRecord> findById(String id) {
+            return Optional.ofNullable(data.get(id));
         }
     }
 }

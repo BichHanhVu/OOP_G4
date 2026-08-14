@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Tạo Phiếu Mượn Sách</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input { padding: 8px; width: 300px; box-sizing: border-box; }
+        button { padding: 8px 15px; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 4px; }
+        button:hover { background-color: #0056b3; }
+        table { border-collapse: collapse; width: 100%; margin-top: 15px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .btn-add { background-color: #28a745; margin-left: 10px; }
+        .btn-add:hover { background-color: #218838; }
+        #message { margin-top: 15px; font-weight: bold; }
+    </style>
+</head>
+<body>
+<h2>Tạo Phiếu Mượn Sách</h2>
+
+<div class="form-group">
+    <label for="readerId">Mã bạn đọc:</label>
+    <input type="text" id="readerId" placeholder="Nhập mã bạn đọc (vd: R001)">
+</div>
+
+<div class="form-group">
+    <label for="borrowDate">Ngày mượn:</label>
+    <input type="date" id="borrowDate">
+</div>
+
+<div class="form-group">
+    <label for="dueDate">Hạn trả:</label>
+    <input type="date" id="dueDate">
+</div>
+
+<hr>
+<h3>Danh sách sách mượn</h3>
+
+<div class="form-group">
+    <input type="text" id="bookId" placeholder="Mã sách (vd: B001)">
+    <input type="number" id="quantity" placeholder="Số lượng" min="1" value="1" style="width: 100px;">
+    <button type="button" class="btn-add" onclick="addItem()">Nút thêm item</button>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>Mã sách</th>
+        <th>Số lượng</th>
+        <th>Thao tác</th>
+    </tr>
+    </thead>
+    <tbody id="itemsTableBody">
+    </tbody>
+</table>
+
+<br>
+<button type="button" onclick="createTicket()">Nút tạo phiếu</button>
+
+<div id="message"></div>
+
+<script src="../js/borrow.js"></script>
+</body>
+</html>

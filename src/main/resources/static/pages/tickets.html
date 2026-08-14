@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Danh Sách Phiếu Mượn</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        table { border-collapse: collapse; width: 100%; margin-top: 15px; }
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: left; vertical-align: top; }
+        th { background-color: #f2f2f2; }
+        .status { font-weight: bold; color: #007bff; }
+    </style>
+</head>
+<body>
+<h2>Danh Sách Phiếu Mượn Sách</h2>
+
+<table>
+    <thead>
+    <tr>
+        <th>Mã phiếu</th>
+        <th>Mã bạn đọc</th>
+        <th>Ngày mượn</th>
+        <th>Hạn trả</th>
+        <th>Trạng thái</th>
+        <th>Danh sách sách và số lượng</th>
+    </tr>
+    </thead>
+    <tbody id="ticketsTableBody">
+    </tbody>
+</table>
+
+<script src="../js/tickets.js"></script>
+</body>
+</html>

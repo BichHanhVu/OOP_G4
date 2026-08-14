@@ -1,32 +1,5 @@
 package com.group4.library.model;
 
-<<<<<<< HEAD
-public class Book {
-    private String id;
-    private String title;
-    private String author;
-    private int quantity;
-
-    // Constructor không tham số (Bắt buộc cho Jackson/JSON deserialization)
-    public Book() {
-    }
-
-    // Constructor đầy đủ tham số
-    public Book(String id, String title, String author, int quantity) {
-        this.id = id;
-        this.title = title;
-        this.author = author;
-        this.quantity = quantity;
-    }
-
-    // Getters & Setters
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-=======
 public class Book implements Borrowable {
     private String bookId;
     private String title;
@@ -94,7 +67,6 @@ public class Book implements Borrowable {
 
     public void setBookId(String bookId) {
         this.bookId = bookId;
->>>>>>> origin/main
     }
 
     public String getTitle() {
@@ -113,24 +85,6 @@ public class Book implements Borrowable {
         this.author = author;
     }
 
-<<<<<<< HEAD
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    @Override
-    public String toString() {
-        return "Book{" +
-                "id='" + id + '\'' +
-                ", title='" + title + '\'' +
-                ", author='" + author + '\'' +
-                ", quantity=" + quantity +
-                '}';
-=======
     public String getGenre() {
         return genre;
     }
@@ -159,6 +113,5 @@ public class Book implements Borrowable {
             throw new IllegalArgumentException("Lỗi: Giá trị sách không được âm!");
         }
         this.price = price;
->>>>>>> origin/main
     }
 }

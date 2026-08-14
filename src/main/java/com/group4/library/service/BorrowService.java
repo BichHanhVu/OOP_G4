@@ -1,19 +1,25 @@
 package com.group4.library.service;
 
-import com.group4.library.exception.InvalidQuantityException;
-import com.group4.library.exception.InvalidBorrowDateException;
-import com.group4.library.exception.BorrowLimitExceededException;
-
 import com.group4.library.dto.BorrowItemRequest;
 import com.group4.library.dto.BorrowItemResponse;
 import com.group4.library.dto.BorrowRequest;
 import com.group4.library.dto.BorrowTicketResponse;
 
+import com.group4.library.exception.BorrowLimitExceededException;
+import com.group4.library.exception.InvalidBorrowDateException;
+import com.group4.library.exception.InvalidQuantityException;
+import com.group4.library.exception.OutOfStockException;
+import com.group4.library.exception.ResourceNotFoundException;
+
+import com.group4.library.model.Book;
 import com.group4.library.model.BorrowTicket;
 import com.group4.library.model.BorrowTicketDetail;
+import com.group4.library.model.Reader;
 import com.group4.library.model.TicketStatus;
 
+import com.group4.library.repository.BookRepository;
 import com.group4.library.repository.BorrowTicketRepository;
+import com.group4.library.repository.ReaderRepository;
 
 import org.springframework.stereotype.Service;
 
@@ -26,100 +32,91 @@ import java.util.stream.Stream;
 public class BorrowService {
 
     private final BorrowTicketRepository borrowTicketRepository;
-    // // Code của Bách:
-    // private final ReaderRepository readerRepository;
-    // // Code của Tiệp:
-    // private final BookRepository bookRepository;
+    private final ReaderRepository readerRepository;
+    private final BookRepository bookRepository;
 
-    // Constructor Injection chỉ giữ lại Repository của Duyên
-    public BorrowService(BorrowTicketRepository borrowTicketRepository
-                         /*, ReaderRepository readerRepository,
-                         BookRepository bookRepository */) {
+    public BorrowService(BorrowTicketRepository borrowTicketRepository,
+                         ReaderRepository readerRepository,
+                         BookRepository bookRepository) {
         this.borrowTicketRepository = borrowTicketRepository;
-        // this.readerRepository = readerRepository;
-        // this.bookRepository = bookRepository;
+        this.readerRepository = readerRepository;
+        this.bookRepository = bookRepository;
     }
 
     public BorrowTicketResponse createBorrowTicket(BorrowRequest request) {
-        // 1. Kiểm tra Request & Reader Null/Empty (Yêu cầu cmt 1)
+        // 1. Validation request & reader
         if (request == null) {
-            throw new IllegalArgumentException("Yêu cầu mượn sách không được để trống (Request is null)!");
-        }
-        if (request.getReaderId() == null || request.getReaderId().trim().isEmpty()) {
-            throw new IllegalArgumentException("Mã bạn đọc không được để trống!");
+            throw new IllegalArgumentException("Yêu cầu mượn sách không được để trống");
         }
 
-        // 2. Kiểm tra danh sách items không null và không rỗng (Yêu cầu cmt 1)
-        if (request.getItems() == null || request.getItems().isEmpty()) {
-            throw new InvalidQuantityException("Danh sách sách mượn không được null hoặc để trống!");
+        if (request.getReaderId() == null || request.getReaderId().isBlank()) {
+            throw new IllegalArgumentException("Mã bạn đọc không được để trống");
         }
 
-        // // Code của Bách: Kiểm tra bạn đọc có tồn tại không
-        // var reader = readerRepository.findById(request.getReaderId().trim())
-        //         .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bạn đọc có mã: " + request.getReaderId()));
-
-        // 3. Kiểm tra borrowDate và dueDate không null, dueDate >= borrowDate (Yêu cầu cmt 2)
+        // 2. Validation ngày mượn & hạn trả
         if (request.getBorrowDate() == null) {
-            throw new IllegalArgumentException("Ngày mượn (borrowDate) không được để trống!");
+            throw new InvalidBorrowDateException("Ngày mượn không được để trống");
         }
+
         if (request.getDueDate() == null) {
-            throw new IllegalArgumentException("Hạn trả (dueDate) không được để trống!");
+            throw new InvalidBorrowDateException("Hạn trả không được để trống");
         }
 
-        LocalDate borrowDate = request.getBorrowDate();
-        LocalDate dueDate = request.getDueDate();
-
-        if (dueDate.isBefore(borrowDate)) {
-            throw new InvalidBorrowDateException("Hạn trả (dueDate) không được trước ngày mượn (borrowDate)!");
+        if (request.getDueDate().isBefore(request.getBorrowDate())) {
+            throw new InvalidBorrowDateException("Hạn trả không được trước ngày mượn");
         }
 
-        // 4. Validate từng item & Gộp các mã sách bị lặp lại (Yêu cầu cmt 1: Gộp số lượng tránh giảm kho sai)
-        Map<String, Integer> consolidatedItems = new HashMap<>();
+        // 3. Validation danh sách items
+        if (request.getItems() == null || request.getItems().isEmpty()) {
+            throw new InvalidQuantityException("Danh sách sách mượn không được để trống");
+        }
+
+        // 4. Kiểm tra bạn đọc có tồn tại trong hệ thống (Mục 11)
+        Reader reader = readerRepository.findById(request.getReaderId().trim())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bạn đọc: " + request.getReaderId()));
+
+        // 5. Gộp các mã sách bị lặp bằng LinkedHashMap (Mục 14)
+        Map<String, Integer> consolidatedItems = new LinkedHashMap<>();
+
         for (BorrowItemRequest item : request.getItems()) {
             if (item == null) {
-                throw new IllegalArgumentException("Thông tin sách mượn không được null!");
+                throw new IllegalArgumentException("Thông tin sách mượn không được null");
             }
 
-            // Check code null hoặc rỗng
-            if (item.getCode() == null || item.getCode().trim().isEmpty()) {
-                throw new IllegalArgumentException("Mã sách không được để trống!");
+            if (item.getBookId() == null || item.getBookId().isBlank()) {
+                throw new IllegalArgumentException("Mã sách không được để trống");
             }
 
-            // Check số lượng <= 0
             if (item.getQuantity() <= 0) {
-                throw new InvalidQuantityException(
-                        String.format("Số lượng mượn của sách '%s' không hợp lệ (%d). Số lượng phải lớn hơn 0!",
-                                item.getCode().trim(), item.getQuantity())
-                );
+                throw new InvalidQuantityException("Số lượng mượn phải lớn hơn 0");
             }
 
-            // Gộp số lượng nếu trùng bookCode
-            String bookCode = item.getCode().trim();
-            consolidatedItems.put(bookCode, consolidatedItems.getOrDefault(bookCode, 0) + item.getQuantity());
+            String bookId = item.getBookId()
+                    .trim()
+                    .toUpperCase();
+
+            consolidatedItems.merge(
+                    bookId,
+                    item.getQuantity(),
+                    Integer::sum
+            );
         }
 
-        // 5. Kiểm tra giới hạn mượn (Borrow Limit)
+        // 6. Kiểm tra giới hạn mượn lấy từ Reader (Mục 12)
         int newBorrowCount = consolidatedItems.values().stream().mapToInt(Integer::intValue).sum();
 
         List<BorrowTicket> activeTickets = borrowTicketRepository.findByReaderIdAndStatus(
                 request.getReaderId().trim(), TicketStatus.BORROWING
         );
 
-        // Đã bổ sung check null-safe tránh crash app (Thay null bằng Stream.empty())
         int currentBorrowingCount = activeTickets.stream()
                 .filter(Objects::nonNull)
-                .flatMap(t -> t.getItems() != null ? t.getItems().stream() : Stream.empty())
+                .flatMap(ticket -> ticket.getItems() != null ? ticket.getItems().stream() : Stream.empty())
                 .filter(Objects::nonNull)
                 .mapToInt(BorrowTicketDetail::getQuantity)
                 .sum();
 
-        // Mặc định giới hạn tối đa 5 cuốn (chờ Bách chốt logic Reader)
-        int maxLimit = 5;
-        /* // Code của Bách:
-        try {
-            maxLimit = reader.getMaxBorrowLimit();
-        } catch (Exception ignored) {}
-        */
+        int maxLimit = reader.getMaxBorrowLimit();
 
         if (currentBorrowingCount + newBorrowCount > maxLimit) {
             throw new BorrowLimitExceededException(
@@ -128,26 +125,25 @@ public class BorrowService {
             );
         }
 
-        /* // 6. Code của Tiệp: KIỂM TRA TỒN KHO SÁCH (Comment tạm chờ Tiệp)
+        // 7. Kiểm tra tồn kho sách
         Map<String, Book> bookMap = new HashMap<>();
         for (Map.Entry<String, Integer> entry : consolidatedItems.entrySet()) {
             String bookId = entry.getKey();
             int reqQty = entry.getValue();
 
             Book book = bookRepository.findById(bookId)
-                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sách có mã: " + bookId));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sách: " + bookId));
 
-            if (book.getQuantity() < reqQty) {
+            if (book.getAvailableQuantity() < reqQty) {
                 throw new OutOfStockException(
                         String.format("Sách '%s' không đủ tồn kho (Còn: %d, Yêu cầu: %d)!",
-                                book.getTitle(), book.getQuantity(), reqQty)
+                                book.getTitle(), book.getAvailableQuantity(), reqQty)
                 );
             }
             bookMap.put(bookId, book);
         }
-        */
 
-        // 7. TẠO PHIẾU MƯỢN (Phần logic chính của Duyên)
+        // 8. Tạo phiếu mượn & trừ kho
         String ticketId = "TICK-" + System.currentTimeMillis();
         List<BorrowTicketDetail> details = new ArrayList<>();
 
@@ -155,13 +151,10 @@ public class BorrowService {
             String bookCode = entry.getKey();
             int reqQty = entry.getValue();
 
-            /* // Code của Tiệp: Trừ kho
             Book book = bookMap.get(bookCode);
-            book.setQuantity(book.getQuantity() - reqQty);
+            book.setAvailableQuantity(book.getAvailableQuantity() - reqQty);
             bookRepository.save(book);
-            */
 
-            // Tạo Chi tiết phiếu
             details.add(new BorrowTicketDetail(
                     UUID.randomUUID().toString(),
                     ticketId,
@@ -170,22 +163,21 @@ public class BorrowService {
             ));
         }
 
-        // 8. Lưu phiếu mượn xuống JSON (Logic của Duyên)
         BorrowTicket ticket = new BorrowTicket(
                 ticketId,
                 request.getReaderId().trim(),
-                borrowDate,
-                dueDate,
+                request.getBorrowDate(),
+                request.getDueDate(),
                 null,
                 TicketStatus.BORROWING,
                 details
         );
         BorrowTicket savedTicket = borrowTicketRepository.save(ticket);
 
-        // 9. Chuyển đổi sang Response DTO
         return mapToResponse(savedTicket);
     }
 
+    // API Lấy danh sách phiếu (Mục 15)
     public List<BorrowTicketResponse> getAllTickets(String readerId, TicketStatus status) {
         List<BorrowTicket> tickets;
         if (readerId != null && status != null) {
@@ -201,9 +193,10 @@ public class BorrowService {
         return tickets.stream().map(this::mapToResponse).collect(Collectors.toList());
     }
 
+    // API Lấy phiếu theo ID (Mục 15 - Dùng ResourceNotFoundException)
     public BorrowTicketResponse getTicketById(String ticketId) {
         BorrowTicket ticket = borrowTicketRepository.findById(ticketId)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phiếu mượn với mã: " + ticketId));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu mượn: " + ticketId));
         return mapToResponse(ticket);
     }
 
@@ -216,7 +209,6 @@ public class BorrowService {
         resp.setReturnDate(ticket.getReturnDate());
         resp.setStatus(ticket.getStatus());
 
-        // Bổ sung check Objects::nonNull cho an toàn
         if (ticket.getItems() != null) {
             List<BorrowItemResponse> itemDtos = ticket.getItems().stream()
                     .filter(Objects::nonNull)
