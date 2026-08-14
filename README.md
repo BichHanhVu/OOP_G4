@@ -6,6 +6,9 @@ Mặc định chạy tại http://localhost:8080
 ## Chạy test
 
 ```
+mvn test
+```
+
 ## Dữ liệu
 Dữ liệu bạn đọc lưu tại `data/readers.json` (tự tạo nếu chưa tồn tại).
 
@@ -60,3 +63,6 @@ Response `201 Created`:
 1. Khởi động app bằng `mvn spring-boot:run`
 2. Tạo request `POST http://localhost:8080/api/readers`, Body → raw → JSON, dán ví dụ ở trên
 3. Gửi `GET http://localhost:8080/api/readers` để xem danh sách vừa thêm
+
+## Checklist chờ tích hợp
+- [ ] Rule "không xóa bạn đọc đang có phiếu BORROWING" — cần `BorrowTicketRepository` từ module Borrow (Duyên), hoàn thiện sau khi module đó merge.
