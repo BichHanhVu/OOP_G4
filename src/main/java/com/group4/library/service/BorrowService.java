@@ -134,10 +134,14 @@ public class BorrowService {
             Book book = bookRepository.findById(bookId)
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sách: " + bookId));
 
-            if (book.getAvailableQuantity() < reqQty) {
+            if (!book.canBorrow(reqQty)) {
                 throw new OutOfStockException(
-                        String.format("Sách '%s' không đủ tồn kho (Còn: %d, Yêu cầu: %d)!",
-                                book.getTitle(), book.getAvailableQuantity(), reqQty)
+                        String.format(
+                                "Sách '%s' không đủ tồn kho (Còn: %d, Yêu cầu: %d)!",
+                                book.getTitle(),
+                                book.getAvailableQuantity(),
+                                reqQty
+                        )
                 );
             }
             bookMap.put(bookId, book);
@@ -148,18 +152,25 @@ public class BorrowService {
         List<BorrowTicketDetail> details = new ArrayList<>();
 
         for (Map.Entry<String, Integer> entry : consolidatedItems.entrySet()) {
-            String bookCode = entry.getKey();
-            int reqQty = entry.getValue();
+            String bookId = entry.getKey();
+            int requestedQuantity = entry.getValue();
 
-            Book book = bookMap.get(bookCode);
-            book.setAvailableQuantity(book.getAvailableQuantity() - reqQty);
-            bookRepository.save(book);
+            Book book = bookMap.get(bookId);
+            book.borrow(requestedQuantity);
+
+            boolean updated = bookRepository.update(book);
+
+            if (!updated) {
+                throw new IllegalStateException(
+                        "Không thể cập nhật tồn kho sách: " + bookId
+                );
+            }
 
             details.add(new BorrowTicketDetail(
                     UUID.randomUUID().toString(),
                     ticketId,
-                    bookCode,
-                    reqQty
+                    bookId,
+                    requestedQuantity
             ));
         }
 

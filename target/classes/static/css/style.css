@@ -1,6 +1,0 @@
-body { font-family: Arial, sans-serif; margin: 24px; }
-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-.error { color: red; }
-.success { color: green; }
-.toolbar { margin-bottom: 12px; }
