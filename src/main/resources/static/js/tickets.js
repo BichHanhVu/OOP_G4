@@ -52,7 +52,9 @@ async function loadTickets() {
 }
 
 
-function filterTickets() {
+function filterTickets(
+
+) {
 
     const keyword =
         document

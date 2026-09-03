@@ -35,7 +35,9 @@ function addItem() {
 
 function removeItem(index) {
     items.splice(index, 1);
-    renderItemsTable();
+    renderItemsTable(
+
+    );
 }
 
 
