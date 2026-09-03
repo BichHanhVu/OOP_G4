@@ -1,271 +1,165 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content=
-            "width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Phiếu mượn | Thư viện G4</title>
 
     <!-- Bootstrap Icons -->
     <link
-            rel="stylesheet"
-            href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
-    >
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
 
     <!-- CSS chính -->
-    <link rel="stylesheet" href="../css/style.css">
-</head>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
 
-
-<body>
-
-<div class="app-layout">
-
-    <!-- ================= SIDEBAR ================= -->
-    <aside class="app-sidebar" id="appSidebar">
-
+  <body>
+    <div class="app-layout">
+      <!-- ================= SIDEBAR ================= -->
+      <aside class="app-sidebar" id="appSidebar">
         <div class="sidebar-brand">
+          <div class="sidebar-brand-icon">
+            <i class="bi bi-book-half"></i>
+          </div>
 
-            <div class="sidebar-brand-icon">
-                <i class="bi bi-book-half"></i>
-            </div>
-
-            <h1>THƯ VIỆN G4</h1>
-
+          <h1>THƯ VIỆN G4</h1>
         </div>
 
-
         <nav class="sidebar-menu">
+          <a class="sidebar-link" href="../index.html">
+            <i class="bi bi-grid-1x2-fill"></i>
+            <span>Tổng quan</span>
+          </a>
 
-            <a class="sidebar-link"
-               href="../index.html">
-                <i class="bi bi-grid-1x2-fill"></i>
-                <span>Tổng quan</span>
-            </a>
+          <a class="sidebar-link" href="readers.html">
+            <i class="bi bi-people-fill"></i>
+            <span>Bạn đọc</span>
+          </a>
 
-            <a class="sidebar-link"
-               href="readers.html">
-                <i class="bi bi-people-fill"></i>
-                <span>Bạn đọc</span>
-            </a>
+          <a class="sidebar-link" href="books.html">
+            <i class="bi bi-book-fill"></i>
+            <span>Sách</span>
+          </a>
 
-            <a class="sidebar-link"
-               href="books.html">
-                <i class="bi bi-book-fill"></i>
-                <span>Sách</span>
-            </a>
+          <a class="sidebar-link" href="borrow.html">
+            <i class="bi bi-journal-plus"></i>
+            <span>Mượn sách</span>
+          </a>
 
-            <a class="sidebar-link"
-               href="borrow.html">
-                <i class="bi bi-journal-plus"></i>
-                <span>Mượn sách</span>
-            </a>
+          <a class="sidebar-link active" href="tickets.html">
+            <i class="bi bi-receipt"></i>
+            <span>Phiếu mượn</span>
+          </a>
 
-            <a class="sidebar-link active"
-               href="tickets.html">
-                <i class="bi bi-receipt"></i>
-                <span>Phiếu mượn</span>
-            </a>
+          <a class="sidebar-link" href="return.html">
+            <i class="bi bi-arrow-return-left"></i>
+            <span>Trả sách</span>
+          </a>
 
-            <a class="sidebar-link"
-               href="return.html">
-                <i class="bi bi-arrow-return-left"></i>
-                <span>Trả sách</span>
-            </a>
-
-            <a class="sidebar-link"
-               href="history.html">
-                <i class="bi bi-clock-history"></i>
-                <span>Lịch sử</span>
-            </a>
-
+          <a class="sidebar-link" href="history.html">
+            <i class="bi bi-clock-history"></i>
+            <span>Lịch sử</span>
+          </a>
         </nav>
+      </aside>
 
-    </aside>
-
-
-    <!-- ================= MAIN ================= -->
-    <main class="app-main">
-
-
+      <!-- ================= MAIN ================= -->
+      <main class="app-main">
         <!-- HEADER -->
         <header class="app-header">
+          <div style="display: flex; align-items: center; gap: 14px">
+            <button class="menu-toggle" id="menuToggle" type="button">
+              <i class="bi bi-list"></i>
+            </button>
 
-            <div
-                    style="
-          display:flex;
-          align-items:center;
-          gap:14px;
-        "
-            >
+            <div class="header-title">
+              <h1>Phiếu mượn</h1>
 
-                <button
-                        class="menu-toggle"
-                        id="menuToggle"
-                        type="button"
-                >
-                    <i class="bi bi-list"></i>
-                </button>
-
-
-                <div class="header-title">
-
-                    <h1>Phiếu mượn</h1>
-
-                    <p>
-                        Tra cứu và theo dõi trạng thái phiếu
-                    </p>
-
-                </div>
-
+              <p>Tra cứu và theo dõi trạng thái phiếu</p>
             </div>
-
+          </div>
         </header>
-
 
         <!-- ================= PAGE CONTENT ================= -->
         <div class="page-content">
+          <!-- MESSAGE -->
+          <div id="message"></div>
 
+          <!-- ================= TICKET LIST ================= -->
+          <section class="content-card">
+            <!-- CARD HEADER -->
+            <div class="card-header">
+              <div>
+                <h2 class="card-title">Danh sách phiếu mượn</h2>
 
-            <!-- MESSAGE -->
-            <div id="message"></div>
+                <p class="card-description">
+                  Theo dõi phiếu đang mượn, đã trả và quá hạn
+                </p>
+              </div>
+            </div>
 
+            <!-- ================= SEARCH / FILTER ================= -->
+            <div class="toolbar">
+              <input
+                type="text"
+                id="ticketSearch"
+                placeholder="Tìm theo mã phiếu hoặc bạn đọc..."
+              />
 
-            <!-- ================= TICKET LIST ================= -->
-            <section class="content-card">
+              <select id="ticketStatus">
+                <option value="">Tất cả trạng thái</option>
 
+                <option value="BORROWING">Đang mượn</option>
 
-                <!-- CARD HEADER -->
-                <div class="card-header">
+                <option value="RETURNED">Đã trả</option>
 
-                    <div>
+                <option value="OVERDUE">Quá hạn</option>
+              </select>
+            </div>
 
-                        <h2 class="card-title">
-                            Danh sách phiếu mượn
-                        </h2>
+            <!-- ================= TABLE ================= -->
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Mã phiếu</th>
 
-                        <p class="card-description">
-                            Theo dõi phiếu đang mượn, đã trả và quá hạn
-                        </p>
+                    <th>Bạn đọc</th>
 
-                    </div>
+                    <th>Ngày mượn</th>
 
-                </div>
+                    <th>Hạn trả</th>
 
+                    <th>Trạng thái</th>
 
-                <!-- ================= SEARCH / FILTER ================= -->
-                <div class="toolbar">
+                    <th>Sách và số lượng</th>
+                  </tr>
+                </thead>
 
-                    <input
-                            type="text"
-                            id="ticketSearch"
-                            placeholder="Tìm theo mã phiếu hoặc bạn đọc..."
-                    >
-
-
-                    <select id="ticketStatus">
-
-                        <option value="">
-                            Tất cả trạng thái
-                        </option>
-
-                        <option value="BORROWING">
-                            Đang mượn
-                        </option>
-
-                        <option value="RETURNED">
-                            Đã trả
-                        </option>
-
-                        <option value="OVERDUE">
-                            Quá hạn
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                <!-- ================= TABLE ================= -->
-                <div class="table-wrapper">
-
-                    <table>
-
-                        <thead>
-
-                        <tr>
-
-                            <th>
-                                Mã phiếu
-                            </th>
-
-                            <th>
-                                Bạn đọc
-                            </th>
-
-                            <th>
-                                Ngày mượn
-                            </th>
-
-                            <th>
-                                Hạn trả
-                            </th>
-
-                            <th>
-                                Trạng thái
-                            </th>
-
-                            <th>
-                                Sách và số lượng
-                            </th>
-
-                        </tr>
-
-                        </thead>
-
-
-                        <tbody id="ticketsTableBody">
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            </section>
-
+                <tbody id="ticketsTableBody"></tbody>
+              </table>
+            </div>
+          </section>
         </div>
+      </main>
+    </div>
 
-    </main>
+    <!-- ================= JAVASCRIPT ================= -->
 
-</div>
+    <script src="../js/tickets.js"></script>
 
+    <!-- SIDEBAR TOGGLE -->
+    <script>
+      const menuToggle = document.getElementById("menuToggle");
 
-<!-- ================= JAVASCRIPT ================= -->
+      const appSidebar = document.getElementById("appSidebar");
 
-<script src="../js/tickets.js"></script>
-
-
-<!-- SIDEBAR TOGGLE -->
-<script>
-
-    const menuToggle =
-        document.getElementById("menuToggle");
-
-    const appSidebar =
-        document.getElementById("appSidebar");
-
-
-    menuToggle.addEventListener("click", () => {
-
+      menuToggle.addEventListener("click", () => {
         appSidebar.classList.toggle("open");
-
-    });
-
-</script>
-
-</body>
+      });
+    </script>
+  </body>
 </html>
-

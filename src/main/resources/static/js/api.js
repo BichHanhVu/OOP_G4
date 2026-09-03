@@ -1,15 +1,30 @@
-const API_BASE = "/api";
+const API_BASE_URL = "/api";
 
-async function apiRequest(path, options = {}) {
-    const res = await fetch(`${API_BASE}${path}`, {
-        headers: { "Content-Type": "application/json" },
-        ...options,
-    });
+async function apiRequest(endpoint, options = {}) {
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+    ...options,
+  });
 
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({ message: "Lỗi không xác định" }));
-        throw new Error(err.message || "Lỗi không xác định");
+  if (!response.ok) {
+    let message = "Đã xảy ra lỗi.";
+
+    try {
+      const errorData = await response.json();
+      message = errorData.message || message;
+    } catch (error) {
+      console.error("Không thể đọc nội dung lỗi:", error);
     }
-    if (res.status === 204) return null;
-    return res.json();
+
+    throw new Error(message);
+  }
+
+  if (response.status === 204) {
+    return null;
+  }
+
+  return response.json();
 }

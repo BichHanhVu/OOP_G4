@@ -1,470 +1,366 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0"
-    >
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Tổng quan | Thư viện G4</title>
 
     <!-- Bộ icon -->
     <link
-            rel="stylesheet"
-            href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
-    >
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
 
     <!-- CSS dùng chung -->
-    <link rel="stylesheet" href="css/style.css">
-</head>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
 
-<body>
-<div class="app-layout">
-
-    <!-- ======================
+  <body>
+    <div class="app-layout">
+      <!-- ======================
          SIDEBAR
          ====================== -->
-    <aside class="app-sidebar" id="appSidebar">
-
+      <aside class="app-sidebar" id="appSidebar">
         <div class="sidebar-brand">
-            <div class="sidebar-brand-icon">
-                <i class="bi bi-book-half"></i>
-            </div>
+          <div class="sidebar-brand-icon">
+            <i class="bi bi-book-half"></i>
+          </div>
 
-            <h1>THƯ VIỆN G4</h1>
+          <h1>THƯ VIỆN G4</h1>
         </div>
 
         <nav class="sidebar-menu">
+          <a class="sidebar-link active" href="index.html">
+            <i class="bi bi-grid-1x2-fill"></i>
+            <span>Tổng quan</span>
+          </a>
 
-            <a class="sidebar-link active" href="index.html">
-                <i class="bi bi-grid-1x2-fill"></i>
-                <span>Tổng quan</span>
-            </a>
+          <a class="sidebar-link" href="pages/readers.html">
+            <i class="bi bi-people-fill"></i>
+            <span>Bạn đọc</span>
+          </a>
 
-            <a class="sidebar-link" href="pages/readers.html">
-                <i class="bi bi-people-fill"></i>
-                <span>Bạn đọc</span>
-            </a>
+          <a class="sidebar-link" href="pages/books.html">
+            <i class="bi bi-book-fill"></i>
+            <span>Sách</span>
+          </a>
 
-            <a class="sidebar-link" href="pages/books.html">
-                <i class="bi bi-book-fill"></i>
-                <span>Sách</span>
-            </a>
+          <a class="sidebar-link" href="pages/borrow.html">
+            <i class="bi bi-journal-plus"></i>
+            <span>Mượn sách</span>
+          </a>
 
-            <a class="sidebar-link" href="pages/borrow.html">
-                <i class="bi bi-journal-plus"></i>
-                <span>Mượn sách</span>
-            </a>
+          <a class="sidebar-link" href="pages/tickets.html">
+            <i class="bi bi-receipt"></i>
+            <span>Phiếu mượn</span>
+          </a>
 
-            <a class="sidebar-link" href="pages/tickets.html">
-                <i class="bi bi-receipt"></i>
-                <span>Phiếu mượn</span>
-            </a>
+          <a class="sidebar-link" href="pages/return.html">
+            <i class="bi bi-arrow-return-left"></i>
+            <span>Trả sách</span>
+          </a>
 
-            <a class="sidebar-link" href="pages/return.html">
-                <i class="bi bi-arrow-return-left"></i>
-                <span>Trả sách</span>
-            </a>
-
-            <a class="sidebar-link" href="pages/history.html">
-                <i class="bi bi-clock-history"></i>
-                <span>Lịch sử</span>
-            </a>
-
+          <a class="sidebar-link" href="pages/history.html">
+            <i class="bi bi-clock-history"></i>
+            <span>Lịch sử</span>
+          </a>
         </nav>
-    </aside>
+      </aside>
 
-    <!-- ======================
+      <!-- ======================
          NỘI DUNG CHÍNH
          ====================== -->
-    <main class="app-main">
-
+      <main class="app-main">
         <!-- Header -->
         <header class="app-header">
+          <div style="display: flex; align-items: center; gap: 14px">
+            <button
+              class="menu-toggle"
+              id="menuToggle"
+              type="button"
+              aria-label="Mở menu"
+            >
+              <i class="bi bi-list"></i>
+            </button>
 
-            <div style="display: flex; align-items: center; gap: 14px;">
-
-                <button
-                        class="menu-toggle"
-                        id="menuToggle"
-                        type="button"
-                        aria-label="Mở menu"
-                >
-                    <i class="bi bi-list"></i>
-                </button>
-
-                <div class="header-title">
-                    <h1>Tổng quan thư viện</h1>
-                    <p>Theo dõi hoạt động mượn trả của thư viện</p>
-                </div>
-
+            <div class="header-title">
+              <h1>Tổng quan thư viện</h1>
+              <p>Theo dõi hoạt động mượn trả của thư viện</p>
             </div>
+          </div>
 
-            <div class="header-date" id="currentDate">
-                <!-- Ngày hiện tại được JavaScript thêm vào -->
-            </div>
-
+          <div class="header-date" id="currentDate">
+            <!-- Ngày hiện tại được JavaScript thêm vào -->
+          </div>
         </header>
 
         <div class="page-content">
+          <!-- Thông báo lỗi khi tải dashboard -->
+          <div id="dashboardError" class="error" role="alert"></div>
 
-            <!-- Thông báo lỗi khi tải dashboard -->
-            <div
-                    id="dashboardError"
-                    class="error"
-                    role="alert"
-            ></div>
-
-            <!-- ======================
+          <!-- ======================
                  CÁC THẺ THỐNG KÊ
                  ====================== -->
-            <section
-                    class="stats-grid"
-                    aria-label="Thống kê tổng quan"
-            >
+          <section class="stats-grid" aria-label="Thống kê tổng quan">
+            <!-- Tổng số bạn đọc -->
+            <article class="stat-card">
+              <div class="stat-icon green">
+                <i class="bi bi-people-fill"></i>
+              </div>
 
-                <!-- Tổng số bạn đọc -->
-                <article class="stat-card">
+              <div>
+                <p class="stat-label">Bạn đọc</p>
 
-                    <div class="stat-icon green">
-                        <i class="bi bi-people-fill"></i>
-                    </div>
+                <p class="stat-value green" id="totalReaders">0</p>
+              </div>
+            </article>
 
-                    <div>
-                        <p class="stat-label">Bạn đọc</p>
+            <!-- Tổng số đầu sách -->
+            <article class="stat-card">
+              <div class="stat-icon blue">
+                <i class="bi bi-book-fill"></i>
+              </div>
 
-                        <p
-                                class="stat-value green"
-                                id="totalReaders"
-                        >
-                            0
-                        </p>
-                    </div>
+              <div>
+                <p class="stat-label">Đầu sách</p>
 
-                </article>
+                <p class="stat-value blue" id="totalBooks">0</p>
+              </div>
+            </article>
 
-                <!-- Tổng số đầu sách -->
-                <article class="stat-card">
+            <!-- Phiếu đang mượn -->
+            <article class="stat-card">
+              <div class="stat-icon orange">
+                <i class="bi bi-journal-bookmark-fill"></i>
+              </div>
 
-                    <div class="stat-icon blue">
-                        <i class="bi bi-book-fill"></i>
-                    </div>
+              <div>
+                <p class="stat-label">Đang mượn</p>
 
-                    <div>
-                        <p class="stat-label">Đầu sách</p>
+                <p class="stat-value orange" id="borrowingTickets">0</p>
+              </div>
+            </article>
 
-                        <p
-                                class="stat-value blue"
-                                id="totalBooks"
-                        >
-                            0
-                        </p>
-                    </div>
+            <!-- Phiếu quá hạn -->
+            <article class="stat-card">
+              <div class="stat-icon red">
+                <i class="bi bi-clock-fill"></i>
+              </div>
 
-                </article>
+              <div>
+                <p class="stat-label">Quá hạn</p>
 
-                <!-- Phiếu đang mượn -->
-                <article class="stat-card">
+                <p class="stat-value red" id="overdueTickets">0</p>
+              </div>
+            </article>
+          </section>
 
-                    <div class="stat-icon orange">
-                        <i class="bi bi-journal-bookmark-fill"></i>
-                    </div>
-
-                    <div>
-                        <p class="stat-label">Đang mượn</p>
-
-                        <p
-                                class="stat-value orange"
-                                id="borrowingTickets"
-                        >
-                            0
-                        </p>
-                    </div>
-
-                </article>
-
-                <!-- Phiếu quá hạn -->
-                <article class="stat-card">
-
-                    <div class="stat-icon red">
-                        <i class="bi bi-clock-fill"></i>
-                    </div>
-
-                    <div>
-                        <p class="stat-label">Quá hạn</p>
-
-                        <p
-                                class="stat-value red"
-                                id="overdueTickets"
-                        >
-                            0
-                        </p>
-                    </div>
-
-                </article>
-
-            </section>
-
-            <!-- ======================
+          <!-- ======================
                  NỘI DUNG HÀNG THỨ HAI
                  ====================== -->
-            <section class="dashboard-grid">
+          <section class="dashboard-grid">
+            <!-- Tình trạng thư viện -->
+            <article class="content-card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title">Tình trạng thư viện</h2>
 
-                <!-- Tình trạng thư viện -->
-                <article class="content-card">
+                  <p class="card-description">
+                    Các thông tin cần theo dõi trong hệ thống
+                  </p>
+                </div>
 
-                    <div class="card-header">
-                        <div>
-                            <h2 class="card-title">
-                                Tình trạng thư viện
-                            </h2>
+                <i
+                  class="bi bi-bar-chart-fill"
+                  style="color: var(--primary); font-size: 24px"
+                ></i>
+              </div>
 
-                            <p class="card-description">
-                                Các thông tin cần theo dõi trong hệ thống
-                            </p>
-                        </div>
+              <div class="overview-list">
+                <div class="overview-item">
+                  <div class="overview-item-left">
+                    <span class="overview-dot green"></span>
+                    <span>Tổng số bạn đọc</span>
+                  </div>
 
-                        <i
-                                class="bi bi-bar-chart-fill"
-                                style="
-                                color: var(--primary);
-                                font-size: 24px;
-                            "
-                        ></i>
-                    </div>
+                  <strong id="overviewReaders">0</strong>
+                </div>
 
-                    <div class="overview-list">
+                <div class="overview-item">
+                  <div class="overview-item-left">
+                    <span class="overview-dot blue"></span>
+                    <span>Tổng số đầu sách</span>
+                  </div>
 
-                        <div class="overview-item">
-                            <div class="overview-item-left">
-                                <span class="overview-dot green"></span>
-                                <span>Tổng số bạn đọc</span>
-                            </div>
+                  <strong id="overviewBooks">0</strong>
+                </div>
 
-                            <strong id="overviewReaders">0</strong>
-                        </div>
+                <div class="overview-item">
+                  <div class="overview-item-left">
+                    <span class="overview-dot orange"></span>
+                    <span>Phiếu đang mượn</span>
+                  </div>
 
-                        <div class="overview-item">
-                            <div class="overview-item-left">
-                                <span class="overview-dot blue"></span>
-                                <span>Tổng số đầu sách</span>
-                            </div>
+                  <strong id="overviewBorrowing">0</strong>
+                </div>
 
-                            <strong id="overviewBooks">0</strong>
-                        </div>
+                <div class="overview-item">
+                  <div class="overview-item-left">
+                    <span class="overview-dot red"></span>
+                    <span>Phiếu cần xử lý quá hạn</span>
+                  </div>
 
-                        <div class="overview-item">
-                            <div class="overview-item-left">
-                                <span class="overview-dot orange"></span>
-                                <span>Phiếu đang mượn</span>
-                            </div>
+                  <strong id="overviewOverdue">0</strong>
+                </div>
+              </div>
+            </article>
 
-                            <strong id="overviewBorrowing">0</strong>
-                        </div>
+            <!-- Thao tác nhanh -->
+            <article class="content-card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title">Thao tác nhanh</h2>
 
-                        <div class="overview-item">
-                            <div class="overview-item-left">
-                                <span class="overview-dot red"></span>
-                                <span>Phiếu cần xử lý quá hạn</span>
-                            </div>
+                  <p class="card-description">
+                    Truy cập nhanh các chức năng thường dùng
+                  </p>
+                </div>
+              </div>
 
-                            <strong id="overviewOverdue">0</strong>
-                        </div>
+              <div class="quick-actions">
+                <a class="quick-action green" href="pages/readers.html">
+                  <i class="bi bi-person-plus-fill"></i>
+                  <span>Thêm bạn đọc</span>
+                </a>
 
-                    </div>
+                <a class="quick-action blue" href="pages/books.html">
+                  <i class="bi bi-book-half"></i>
+                  <span>Thêm sách</span>
+                </a>
 
-                </article>
+                <a class="quick-action orange" href="pages/borrow.html">
+                  <i class="bi bi-file-earmark-plus-fill"></i>
+                  <span>Tạo phiếu mượn</span>
+                </a>
 
-                <!-- Thao tác nhanh -->
-                <article class="content-card">
+                <a class="quick-action red" href="pages/return.html">
+                  <i class="bi bi-arrow-return-left"></i>
+                  <span>Trả sách</span>
+                </a>
+              </div>
+            </article>
+          </section>
 
-                    <div class="card-header">
-                        <div>
-                            <h2 class="card-title">
-                                Thao tác nhanh
-                            </h2>
-
-                            <p class="card-description">
-                                Truy cập nhanh các chức năng thường dùng
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="quick-actions">
-
-                        <a
-                                class="quick-action green"
-                                href="pages/readers.html"
-                        >
-                            <i class="bi bi-person-plus-fill"></i>
-                            <span>Thêm bạn đọc</span>
-                        </a>
-
-                        <a
-                                class="quick-action blue"
-                                href="pages/books.html"
-                        >
-                            <i class="bi bi-book-half"></i>
-                            <span>Thêm sách</span>
-                        </a>
-
-                        <a
-                                class="quick-action orange"
-                                href="pages/borrow.html"
-                        >
-                            <i class="bi bi-file-earmark-plus-fill"></i>
-                            <span>Tạo phiếu mượn</span>
-                        </a>
-
-                        <a
-                                class="quick-action red"
-                                href="pages/return.html"
-                        >
-                            <i class="bi bi-arrow-return-left"></i>
-                            <span>Trả sách</span>
-                        </a>
-
-                    </div>
-
-                </article>
-
-            </section>
-
-            <!-- ======================
+          <!-- ======================
                  HÀNG CUỐI
                  ====================== -->
-            <section class="dashboard-bottom-grid">
+          <section class="dashboard-bottom-grid">
+            <!-- Các chức năng quản lý -->
+            <article class="content-card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title">Quản lý thư viện</h2>
 
-                <!-- Các chức năng quản lý -->
-                <article class="content-card">
+                  <p class="card-description">
+                    Truy cập danh sách phiếu và lịch sử trả sách
+                  </p>
+                </div>
+              </div>
 
-                    <div class="card-header">
-                        <div>
-                            <h2 class="card-title">
-                                Quản lý thư viện
-                            </h2>
+              <div class="management-links">
+                <a class="management-link" href="pages/tickets.html">
+                  <div class="management-link-icon orange">
+                    <i class="bi bi-receipt"></i>
+                  </div>
 
-                            <p class="card-description">
-                                Truy cập danh sách phiếu và lịch sử trả sách
-                            </p>
-                        </div>
-                    </div>
+                  <div>
+                    <strong>Danh sách phiếu mượn</strong>
+                    <span> Tra cứu và kiểm tra trạng thái phiếu </span>
+                  </div>
 
-                    <div class="management-links">
+                  <i class="bi bi-chevron-right"></i>
+                </a>
 
-                        <a
-                                class="management-link"
-                                href="pages/tickets.html"
-                        >
-                            <div class="management-link-icon orange">
-                                <i class="bi bi-receipt"></i>
-                            </div>
+                <a class="management-link" href="pages/history.html">
+                  <div class="management-link-icon green">
+                    <i class="bi bi-clock-history"></i>
+                  </div>
 
-                            <div>
-                                <strong>Danh sách phiếu mượn</strong>
-                                <span>
-                                    Tra cứu và kiểm tra trạng thái phiếu
-                                </span>
-                            </div>
+                  <div>
+                    <strong>Lịch sử trả sách</strong>
+                    <span> Xem ngày trả, số ngày trễ và tiền phạt </span>
+                  </div>
 
-                            <i class="bi bi-chevron-right"></i>
-                        </a>
+                  <i class="bi bi-chevron-right"></i>
+                </a>
+              </div>
+            </article>
 
-                        <a
-                                class="management-link"
-                                href="pages/history.html"
-                        >
-                            <div class="management-link-icon green">
-                                <i class="bi bi-clock-history"></i>
-                            </div>
+            <!-- Tổng tiền phạt -->
+            <article class="fine-card">
+              <div class="fine-icon">
+                <i class="bi bi-cash-stack"></i>
+              </div>
 
-                            <div>
-                                <strong>Lịch sử trả sách</strong>
-                                <span>
-                                    Xem ngày trả, số ngày trễ và tiền phạt
-                                </span>
-                            </div>
+              <p>Tổng tiền phạt</p>
 
-                            <i class="bi bi-chevron-right"></i>
-                        </a>
+              <strong id="totalFineAmount"> 0 đ </strong>
 
-                    </div>
-
-                </article>
-
-                <!-- Tổng tiền phạt -->
-                <article class="fine-card">
-
-                    <div class="fine-icon">
-                        <i class="bi bi-cash-stack"></i>
-                    </div>
-
-                    <p>Tổng tiền phạt</p>
-
-                    <strong id="totalFineAmount">
-                        0 đ
-                    </strong>
-
-                    <span>
-                        Tổng tiền phạt từ các phiếu đã trả
-                    </span>
-
-                </article>
-
-            </section>
-
+              <span> Tổng tiền phạt từ các phiếu đã trả </span>
+            </article>
+          </section>
         </div>
-    </main>
-</div>
+      </main>
+    </div>
 
-<!-- JavaScript -->
-<script src="js/api.js"></script>
-<script src="js/dashboard.js"></script>
+    <!-- JavaScript -->
+    <script src="js/api.js"></script>
+    <script src="js/dashboard.js"></script>
 
-<script>
-    /*
-     * Hiển thị ngày hiện tại trên header.
-     */
-    const currentDateElement = document.getElementById("currentDate");
+    <script>
+      /*
+       * Hiển thị ngày hiện tại trên header.
+       */
+      const currentDateElement = document.getElementById("currentDate");
 
-    const currentDate = new Intl.DateTimeFormat("vi-VN", {
+      const currentDate = new Intl.DateTimeFormat("vi-VN", {
         weekday: "long",
         day: "2-digit",
         month: "2-digit",
-        year: "numeric"
-    }).format(new Date());
+        year: "numeric",
+      }).format(new Date());
 
-    currentDateElement.innerHTML = `
+      currentDateElement.innerHTML = `
         <i class="bi bi-calendar3"></i>
         <span>${currentDate}</span>
     `;
 
-    /*
-     * Đóng/mở sidebar trên màn hình điện thoại.
-     */
-    const menuToggle = document.getElementById("menuToggle");
-    const appSidebar = document.getElementById("appSidebar");
+      /*
+       * Đóng/mở sidebar trên màn hình điện thoại.
+       */
+      const menuToggle = document.getElementById("menuToggle");
+      const appSidebar = document.getElementById("appSidebar");
 
-    menuToggle.addEventListener("click", () => {
+      menuToggle.addEventListener("click", () => {
         appSidebar.classList.toggle("open");
-    });
+      });
 
-    /*
-     * Đóng sidebar khi người dùng bấm ra ngoài.
-     */
-    document.addEventListener("click", (event) => {
+      /*
+       * Đóng sidebar khi người dùng bấm ra ngoài.
+       */
+      document.addEventListener("click", (event) => {
         const clickedInsideSidebar = appSidebar.contains(event.target);
         const clickedMenuButton = menuToggle.contains(event.target);
 
         if (
-            window.innerWidth <= 768 &&
-            !clickedInsideSidebar &&
-            !clickedMenuButton
+          window.innerWidth <= 768 &&
+          !clickedInsideSidebar &&
+          !clickedMenuButton
         ) {
-            appSidebar.classList.remove("open");
+          appSidebar.classList.remove("open");
         }
-    });
-</script>
-</body>
+      });
+    </script>
+  </body>
 </html>
