@@ -6,7 +6,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (modalElement) {
         bookModal = new bootstrap.Modal(modalElement);
     }
-    fetchAndRenderBooks();
+    fetchAndRenderBooks(
+
+    );
 });
 
 function escapeHtml(str) {

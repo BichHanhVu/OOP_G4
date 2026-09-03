@@ -4,7 +4,9 @@ let allTickets = [];
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    loadTickets();
+    loadTickets(
+
+    );
 
     document
         .getElementById("ticketSearch")
