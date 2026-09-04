@@ -1,4 +1,3 @@
-// static/js/readers.js
 async function loadReaders(keyword = "", type = "") {
   try {
     const params = new URLSearchParams();
@@ -18,7 +17,7 @@ function renderTable(readers) {
     LECTURER: "Giảng viên",
   };
   const tbody = document.getElementById("readerTableBody");
-  tbody.innerHTML = ""; // xóa nội dung cũ an toàn
+  tbody.innerHTML = "";
 
   readers.forEach((r) => {
     const tr = document.createElement("tr");
@@ -32,17 +31,22 @@ function renderTable(readers) {
     ];
     cellValues.forEach((value) => {
       const td = document.createElement("td");
-      td.textContent = value; // dùng textContent thay vì chèn thẳng vào innerHTML -> chống XSS
+      td.textContent = value;
       tr.appendChild(td);
     });
 
     const actionTd = document.createElement("td");
+    actionTd.style.display = "flex";
+    actionTd.style.gap = "8px";
+
     const editBtn = document.createElement("button");
-    editBtn.textContent = "Sửa";
+    editBtn.className = "btn btn-secondary";
+    editBtn.innerHTML = '<i class="bi bi-pencil"></i> Sửa';
     editBtn.onclick = () => openEditForm(r.id);
 
     const deleteBtn = document.createElement("button");
-    deleteBtn.textContent = "Xóa";
+    deleteBtn.className = "btn btn-danger";
+    deleteBtn.innerHTML = '<i class="bi bi-trash"></i> Xóa';
     deleteBtn.onclick = () => deleteReader(r.id);
 
     actionTd.appendChild(editBtn);
@@ -65,7 +69,7 @@ function openCreateForm() {
   document.getElementById("editingId").value = "";
   document.getElementById("nameInput").value = "";
   document.getElementById("phoneInput").value = "";
-  document.getElementById("typeInput").value = "STUDENT"; // reset về mặc định, không giữ lựa chọn lần sửa trước
+  document.getElementById("typeInput").value = "STUDENT";
   document.getElementById("readerForm").style.display = "block";
 }
 
