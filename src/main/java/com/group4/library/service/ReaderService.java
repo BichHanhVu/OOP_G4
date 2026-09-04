@@ -11,6 +11,8 @@ import com.group4.library.model.StudentReader;
 import com.group4.library.repository.ReaderRepository;
 import com.group4.library.utils.IdGenerator;
 import org.springframework.stereotype.Service;
+import com.group4.library.model.TicketStatus;
+import com.group4.library.repository.BorrowTicketRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,9 +21,14 @@ import java.util.stream.Collectors;
 public class ReaderService {
 
     private final ReaderRepository readerRepository;
+    private final BorrowTicketRepository borrowTicketRepository;
 
-    public ReaderService(ReaderRepository readerRepository) {
+    public ReaderService(
+            ReaderRepository readerRepository,
+            BorrowTicketRepository borrowTicketRepository
+    ) {
         this.readerRepository = readerRepository;
+        this.borrowTicketRepository = borrowTicketRepository;
     }
 
     public List<ReaderResponse> getAll(String keyword, String type) {
@@ -38,7 +45,6 @@ public class ReaderService {
         return toResponse(findOrThrow(id));
     }
 
-    // service/ReaderService.java — chỉ đoạn create() thay đổi
     public ReaderResponse create(ReaderRequest request) {
         validateRequest(request);
 
@@ -67,6 +73,18 @@ public class ReaderService {
 
     public void delete(String id) {
         findOrThrow(id);
+
+        boolean hasActiveTicket =
+                !borrowTicketRepository
+                        .findByReaderIdAndStatus(id, TicketStatus.BORROWING)
+                        .isEmpty();
+
+        if (hasActiveTicket) {
+            throw new BusinessException(
+                    "Không thể xóa bạn đọc đang có phiếu mượn chưa trả"
+            );
+        }
+
         readerRepository.deleteById(id);
     }
 

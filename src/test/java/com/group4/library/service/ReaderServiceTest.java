@@ -7,6 +7,9 @@ import com.group4.library.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.group4.library.repository.BorrowTicketRepository;
+import org.mockito.Mockito;
+
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -17,11 +20,17 @@ class ReaderServiceTest {
 
     private ReaderService readerService;
     private InMemoryReaderRepository repository;
+    private BorrowTicketRepository borrowTicketRepository;
 
     @BeforeEach
     void setUp() {
         repository = new InMemoryReaderRepository();
-        readerService = new ReaderService(repository);
+        borrowTicketRepository = Mockito.mock(BorrowTicketRepository.class);
+
+        readerService = new ReaderService(
+                repository,
+                borrowTicketRepository
+        );
     }
 
     @Test
@@ -33,6 +42,18 @@ class ReaderServiceTest {
         assertEquals("Nguyễn Văn A", response.getName());
         assertEquals(3, response.getMaxBorrowLimit());
         assertTrue(repository.existsById("R001"));
+    }
+
+    @Test
+    void themBanDoc_khongTruyenId_sinhMaKeTiepDungTheoDuLieuHienCo() {
+        readerService.create(buildRequest("R001", "Nguyễn Văn A", "0912345678", "STUDENT"));
+        readerService.create(buildRequest("R002", "Trần Thị B", "0987654321", "PRIORITY_STUDENT"));
+        readerService.create(buildRequest("R003", "Lê Văn C", "0901112223", "LECTURER"));
+
+        ReaderResponse response = readerService.create(
+                buildRequest(null, "Phạm Thị D", "0909998887", "STUDENT"));
+
+        assertEquals("R004", response.getId());
     }
 
     @Test
@@ -52,18 +73,7 @@ class ReaderServiceTest {
 
         assertThrows(BusinessException.class, () -> readerService.create(request));
     }
-    // thêm vào ReaderServiceTest.java
-    @Test
-    void themBanDoc_khongTruyenId_sinhMaKeTiepDungTheoDuLieuHienCo() {
-        readerService.create(buildRequest("R001", "Nguyễn Văn A", "0912345678", "STUDENT"));
-        readerService.create(buildRequest("R002", "Trần Thị B", "0987654321", "PRIORITY_STUDENT"));
-        readerService.create(buildRequest("R003", "Lê Văn C", "0901112223", "LECTURER"));
 
-        ReaderResponse response = readerService.create(
-                buildRequest(null, "Phạm Thị D", "0909998887", "STUDENT"));
-
-        assertEquals("R004", response.getId());
-    }
     @Test
     void themBanDoc_sdtSaiDinhDang_baoLoi() {
         ReaderRequest request = buildRequest(null, "Nguyễn Văn A", "abc123", "STUDENT");
