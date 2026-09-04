@@ -230,13 +230,13 @@
 
               <div class="quick-actions">
                 <a class="quick-action green" href="pages/readers.html">
-                  <i class="bi bi-person-plus-fill"></i>
-                  <span>Thêm bạn đọc</span>
+                  <i class="bi bi-people-fill"></i>
+                  <span>Quản lý bạn đọc</span>
                 </a>
 
                 <a class="quick-action blue" href="pages/books.html">
                   <i class="bi bi-book-half"></i>
-                  <span>Thêm sách</span>
+                  <span>Quản lý sách</span>
                 </a>
 
                 <a class="quick-action orange" href="pages/borrow.html">
@@ -317,50 +317,5 @@
     <!-- JavaScript -->
     <script src="js/api.js"></script>
     <script src="js/dashboard.js"></script>
-
-    <script>
-      /*
-       * Hiển thị ngày hiện tại trên header.
-       */
-      const currentDateElement = document.getElementById("currentDate");
-
-      const currentDate = new Intl.DateTimeFormat("vi-VN", {
-        weekday: "long",
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      }).format(new Date());
-
-      currentDateElement.innerHTML = `
-        <i class="bi bi-calendar3"></i>
-        <span>${currentDate}</span>
-    `;
-
-      /*
-       * Đóng/mở sidebar trên màn hình điện thoại.
-       */
-      const menuToggle = document.getElementById("menuToggle");
-      const appSidebar = document.getElementById("appSidebar");
-
-      menuToggle.addEventListener("click", () => {
-        appSidebar.classList.toggle("open");
-      });
-
-      /*
-       * Đóng sidebar khi người dùng bấm ra ngoài.
-       */
-      document.addEventListener("click", (event) => {
-        const clickedInsideSidebar = appSidebar.contains(event.target);
-        const clickedMenuButton = menuToggle.contains(event.target);
-
-        if (
-          window.innerWidth <= 768 &&
-          !clickedInsideSidebar &&
-          !clickedMenuButton
-        ) {
-          appSidebar.classList.remove("open");
-        }
-      });
-    </script>
   </body>
 </html>
