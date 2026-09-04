@@ -27,7 +27,7 @@ async function fetchAndRenderBooks() {
             try {
                 const error = await response.json();
                 errorMsg = error.message || errorMsg;
-            } catch (e) {}
+            } catch (e) { }
             throw new Error(errorMsg);
         }
 
@@ -43,7 +43,7 @@ async function fetchAndRenderBooks() {
             const bookId = book.bookId || '';
             const title = book.title || '';
             const matchesSearch = bookId.toLowerCase().includes(searchQuery) ||
-                                  title.toLowerCase().includes(searchQuery);
+                title.toLowerCase().includes(searchQuery);
 
             const matchesGenre = selectedGenre === "" || book.genre === selectedGenre;
 
@@ -116,8 +116,8 @@ function renderBookTable(books) {
         const row = document.createElement('tr');
         const isAvailable = book.availableQuantity > 0;
         const statusBadge = isAvailable
-            ? `<span class="badge bg-success">Còn sách</span>`
-            : `<span class="badge bg-danger">Hết sách</span>`;
+            ? '<span class="status-badge status-returned">Còn sách</span>'
+            : '<span class="status-badge status-overdue">Hết sách</span>';
 
         const safeBookId = escapeHtml(book.bookId);
         const safeTitle = escapeHtml(book.title);
@@ -135,12 +135,8 @@ function renderBookTable(books) {
             <td>${priceFormatted} đ</td>
             <td>${statusBadge}</td>
             <td class="text-center">
-                <button class="btn btn-sm btn-outline-warning me-1" onclick="openEditModal('${safeBookId}')">
-                    Cập nhật
-                </button>
-                <button class="btn btn-sm btn-outline-danger" onclick="deleteBook('${safeBookId}')">
-                    Xóa
-                </button>
+                <button class="btn btn-secondary" onclick="openEditModal('${safeBookId}')">Cập nhật</button>
+                <button class="btn btn-danger" onclick="deleteBook('${safeBookId}')">Xóa</button>
             </td>
         `;
         tableBody.appendChild(row);
@@ -231,38 +227,5 @@ async function deleteBook(bookId) {
         fetchAndRenderBooks();
     } catch (error) {
         alert(error.message);
-    }
-}
-
-async function importBooks(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    if (!confirm(`Xác nhận nhập dữ liệu từ file '${file.name}'?`)) {
-        event.target.value = '';
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-        const response = await fetch('/api/books/import', {
-            method: 'POST',
-            body: formData
-        });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || 'Nhập dữ liệu thất bại!');
-        }
-
-        const resultText = await response.text();
-        alert(resultText);
-        fetchAndRenderBooks();
-    } catch (error) {
-        alert(error.message);
-    } finally {
-        event.target.value = '';
     }
 }
