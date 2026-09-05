@@ -1,11 +1,11 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content=
-            "width=device-width, initial-scale=1.0">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>Phiếu mượn | Thư viện G4</title>
 
@@ -18,7 +18,6 @@
     <!-- CSS chính -->
     <link rel="stylesheet" href="../css/style.css">
 </head>
-
 
 <body>
 
@@ -36,7 +35,6 @@
             <h1>THƯ VIỆN G4</h1>
 
         </div>
-
 
         <nav class="sidebar-menu">
 
@@ -90,26 +88,21 @@
     <!-- ================= MAIN ================= -->
     <main class="app-main">
 
-
-        <!-- HEADER -->
+        <!-- ================= HEADER ================= -->
         <header class="app-header">
 
-            <div
-                    style="
-          display:flex;
-          align-items:center;
-          gap:14px;
-        "
-            >
+            <div style="
+                display:flex;
+                align-items:center;
+                gap:14px;
+            ">
 
                 <button
                         class="menu-toggle"
                         id="menuToggle"
-                        type="button"
-                >
+                        type="button">
                     <i class="bi bi-list"></i>
                 </button>
-
 
                 <div class="header-title">
 
@@ -129,14 +122,12 @@
         <!-- ================= PAGE CONTENT ================= -->
         <div class="page-content">
 
-
             <!-- MESSAGE -->
             <div id="message"></div>
 
 
             <!-- ================= TICKET LIST ================= -->
             <section class="content-card">
-
 
                 <!-- CARD HEADER -->
                 <div class="card-header">
@@ -164,7 +155,6 @@
                             id="ticketSearch"
                             placeholder="Tìm theo mã phiếu hoặc bạn đọc..."
                     >
-
 
                     <select id="ticketStatus">
 
@@ -222,10 +212,13 @@
                                 Sách và số lượng
                             </th>
 
+                            <th>
+                                Thao tác
+                            </th>
+
                         </tr>
 
                         </thead>
-
 
                         <tbody id="ticketsTableBody">
                         </tbody>
@@ -243,12 +236,108 @@
 </div>
 
 
-<!-- ================= JAVASCRIPT ================= -->
+<!-- ====================================================== -->
+<!-- ================= RENEW MODAL ======================== -->
+<!-- ====================================================== -->
+
+<div id="renewModal"
+     class="modal-overlay"
+     style="display:none;">
+
+    <div class="modal-content">
+
+        <!-- MODAL HEADER -->
+        <div class="modal-header">
+
+            <h2>
+                Gia hạn phiếu mượn
+            </h2>
+
+            <button
+                    type="button"
+                    id="closeRenewModal"
+                    class="modal-close">
+
+                &times;
+
+            </button>
+
+        </div>
+
+
+        <!-- MODAL BODY -->
+        <div class="modal-body">
+
+            <p>
+                Mã phiếu:
+                <strong id="renewTicketId"></strong>
+            </p>
+
+            <p>
+                Hạn trả hiện tại:
+                <strong id="currentDueDate"></strong>
+            </p>
+
+
+            <label for="newDueDate">
+                Ngày hẹn trả mới
+            </label>
+
+            <input
+                    type="date"
+                    id="newDueDate"
+            >
+
+
+            <!-- ERROR / SUCCESS MESSAGE -->
+            <div
+                    id="renewMessage"
+                    class="message"
+                    style="display:none;">
+
+            </div>
+
+        </div>
+
+
+        <!-- MODAL FOOTER -->
+        <div class="modal-footer">
+
+            <button
+                    type="button"
+                    id="cancelRenew"
+                    class="btn">
+
+                Hủy
+
+            </button>
+
+
+            <button
+                    type="button"
+                    id="confirmRenew"
+                    class="btn btn-primary">
+
+                Xác nhận gia hạn
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ====================================================== -->
+<!-- ================= JAVASCRIPT ========================= -->
+<!-- ====================================================== -->
 
 <script src="../js/tickets.js"></script>
 
 
-<!-- SIDEBAR TOGGLE -->
+<!-- ================= SIDEBAR TOGGLE ================= -->
+
 <script>
 
     const menuToggle =
@@ -258,14 +347,17 @@
         document.getElementById("appSidebar");
 
 
-    menuToggle.addEventListener("click", () => {
+    if (menuToggle && appSidebar) {
 
-        appSidebar.classList.toggle("open");
+        menuToggle.addEventListener("click", () => {
 
-    });
+            appSidebar.classList.toggle("open");
+
+        });
+
+    }
 
 </script>
 
 </body>
 </html>
-
