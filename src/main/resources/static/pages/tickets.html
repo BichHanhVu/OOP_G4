@@ -1,11 +1,9 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
 
 <head>
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Phiếu mượn | Thư viện G4</title>
 
@@ -13,7 +11,7 @@
     <link
             rel="stylesheet"
             href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
-    >
+    />
 
     <!-- CSS chính -->
     <link rel="stylesheet" href="../css/style.css">
@@ -27,55 +25,46 @@
     <aside class="app-sidebar" id="appSidebar">
 
         <div class="sidebar-brand">
-
             <div class="sidebar-brand-icon">
                 <i class="bi bi-book-half"></i>
             </div>
 
             <h1>THƯ VIỆN G4</h1>
-
         </div>
 
         <nav class="sidebar-menu">
 
-            <a class="sidebar-link"
-               href="../index.html">
+            <a class="sidebar-link" href="../index.html">
                 <i class="bi bi-grid-1x2-fill"></i>
                 <span>Tổng quan</span>
             </a>
 
-            <a class="sidebar-link"
-               href="readers.html">
+            <a class="sidebar-link" href="readers.html">
                 <i class="bi bi-people-fill"></i>
                 <span>Bạn đọc</span>
             </a>
 
-            <a class="sidebar-link"
-               href="books.html">
+            <a class="sidebar-link" href="books.html">
                 <i class="bi bi-book-fill"></i>
                 <span>Sách</span>
             </a>
 
-            <a class="sidebar-link"
-               href="borrow.html">
+            <a class="sidebar-link" href="borrow.html">
                 <i class="bi bi-journal-plus"></i>
                 <span>Mượn sách</span>
             </a>
 
-            <a class="sidebar-link active"
-               href="tickets.html">
+            <a class="sidebar-link active" href="tickets.html">
                 <i class="bi bi-receipt"></i>
                 <span>Phiếu mượn</span>
             </a>
 
-            <a class="sidebar-link"
-               href="return.html">
+            <a class="sidebar-link" href="return.html">
                 <i class="bi bi-arrow-return-left"></i>
                 <span>Trả sách</span>
             </a>
 
-            <a class="sidebar-link"
-               href="history.html">
+            <a class="sidebar-link" href="history.html">
                 <i class="bi bi-clock-history"></i>
                 <span>Lịch sử</span>
             </a>
@@ -91,16 +80,13 @@
         <!-- ================= HEADER ================= -->
         <header class="app-header">
 
-            <div style="
-                display:flex;
-                align-items:center;
-                gap:14px;
-            ">
+            <div style="display: flex; align-items: center; gap: 14px">
 
                 <button
                         class="menu-toggle"
                         id="menuToggle"
-                        type="button">
+                        type="button"
+                >
                     <i class="bi bi-list"></i>
                 </button>
 
@@ -188,33 +174,20 @@
 
                         <tr>
 
-                            <th>
-                                Mã phiếu
-                            </th>
+                            <th>Mã phiếu</th>
 
-                            <th>
-                                Bạn đọc
-                            </th>
+                            <th>Bạn đọc</th>
 
-                            <th>
-                                Ngày mượn
-                            </th>
+                            <th>Ngày mượn</th>
 
-                            <th>
-                                Hạn trả
-                            </th>
+                            <th>Hạn trả</th>
 
-                            <th>
-                                Trạng thái
-                            </th>
+                            <th>Trạng thái</th>
 
-                            <th>
-                                Sách và số lượng
-                            </th>
+                            <th>Sách và số lượng</th>
 
-                            <th>
-                                Thao tác
-                            </th>
+                            <!-- PHẦN CỦA BẠN -->
+                            <th>Thao tác</th>
 
                         </tr>
 
@@ -240,9 +213,11 @@
 <!-- ================= RENEW MODAL ======================== -->
 <!-- ====================================================== -->
 
-<div id="renewModal"
-     class="modal-overlay"
-     style="display:none;">
+<div
+        id="renewModal"
+        class="modal-overlay"
+        style="display:none;"
+>
 
     <div class="modal-content">
 
@@ -256,10 +231,9 @@
             <button
                     type="button"
                     id="closeRenewModal"
-                    class="modal-close">
-
+                    class="modal-close"
+            >
                 &times;
-
             </button>
 
         </div>
@@ -278,7 +252,6 @@
                 <strong id="currentDueDate"></strong>
             </p>
 
-
             <label for="newDueDate">
                 Ngày hẹn trả mới
             </label>
@@ -288,13 +261,12 @@
                     id="newDueDate"
             >
 
-
             <!-- ERROR / SUCCESS MESSAGE -->
             <div
                     id="renewMessage"
                     class="message"
-                    style="display:none;">
-
+                    style="display:none;"
+            >
             </div>
 
         </div>
@@ -306,20 +278,17 @@
             <button
                     type="button"
                     id="cancelRenew"
-                    class="btn">
-
+                    class="btn"
+            >
                 Hủy
-
             </button>
-
 
             <button
                     type="button"
                     id="confirmRenew"
-                    class="btn btn-primary">
-
+                    class="btn btn-primary"
+            >
                 Xác nhận gia hạn
-
             </button>
 
         </div>
@@ -329,9 +298,7 @@
 </div>
 
 
-<!-- ====================================================== -->
-<!-- ================= JAVASCRIPT ========================= -->
-<!-- ====================================================== -->
+<!-- ================= JAVASCRIPT ================= -->
 
 <script src="../js/tickets.js"></script>
 
@@ -345,7 +312,6 @@
 
     const appSidebar =
         document.getElementById("appSidebar");
-
 
     if (menuToggle && appSidebar) {
 

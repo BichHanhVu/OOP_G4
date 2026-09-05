@@ -2,17 +2,33 @@ let allTickets = [];
 let selectedTicket = null;
 
 
+// ======================================================
+// DOM READY
+// ======================================================
+
 document.addEventListener("DOMContentLoaded", () => {
 
     loadTickets();
 
-    document
-        .getElementById("ticketSearch")
-        .addEventListener("input", filterTickets);
+    const searchInput =
+        document.getElementById("ticketSearch");
 
-    document
-        .getElementById("ticketStatus")
-        .addEventListener("change", filterTickets);
+    const statusSelect =
+        document.getElementById("ticketStatus");
+
+    if (searchInput) {
+        searchInput.addEventListener(
+            "input",
+            filterTickets
+        );
+    }
+
+    if (statusSelect) {
+        statusSelect.addEventListener(
+            "change",
+            filterTickets
+        );
+    }
 
 
     // ================= RENEW MODAL =================
@@ -62,7 +78,6 @@ async function loadTickets() {
     const tbody =
         document.getElementById("ticketsTableBody");
 
-
     try {
 
         const response =
@@ -87,13 +102,17 @@ async function loadTickets() {
 
     } catch (error) {
 
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="7" class="error">
-                    ${error.message}
-                </td>
-            </tr>
-        `;
+        if (tbody) {
+
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="error">
+                        ${error.message}
+                    </td>
+                </tr>
+            `;
+
+        }
 
     }
 
@@ -106,18 +125,25 @@ async function loadTickets() {
 
 function filterTickets() {
 
+    const searchElement =
+        document.getElementById("ticketSearch");
+
+    const statusElement =
+        document.getElementById("ticketStatus");
+
+
     const keyword =
-        document
-            .getElementById("ticketSearch")
-            .value
-            .toLowerCase()
-            .trim();
+        searchElement
+            ? searchElement.value
+                .toLowerCase()
+                .trim()
+            : "";
 
 
     const status =
-        document
-            .getElementById("ticketStatus")
-            .value;
+        statusElement
+            ? statusElement.value
+            : "";
 
 
     const today =
@@ -195,6 +221,11 @@ function renderTickets(tickets) {
         document.getElementById("ticketsTableBody");
 
 
+    if (!tbody) {
+        return;
+    }
+
+
     tbody.innerHTML = "";
 
 
@@ -213,7 +244,6 @@ function renderTickets(tickets) {
         `;
 
         return;
-
     }
 
 
@@ -284,21 +314,14 @@ function renderTickets(tickets) {
 
         // ------------------------------------------
         // Các thông tin cơ bản
-        //
-        // 1. Mã phiếu
-        // 2. Mã bạn đọc
-        // 3. Ngày mượn
-        // 4. Hạn trả
         // ------------------------------------------
 
-        for (
-            const value of [
+        for (const value of [
             ticket.ticketId,
             ticket.readerId,
             ticket.borrowDate || "",
             ticket.dueDate || ""
-        ]
-            ) {
+        ]) {
 
             const td =
                 document.createElement("td");
@@ -473,7 +496,9 @@ function openRenewModal(ticket) {
         newDueDateElement.value =
             "";
 
+
         // Ngày tối thiểu = ngày sau hạn cũ
+
         if (ticket.dueDate) {
 
             const oldDate =
@@ -563,10 +588,14 @@ async function confirmRenewal() {
     }
 
 
+    const newDueDateElement =
+        document.getElementById("newDueDate");
+
+
     const newDueDate =
-        document
-            .getElementById("newDueDate")
-            .value;
+        newDueDateElement
+            ? newDueDateElement.value
+            : "";
 
 
     // ------------------------------------------
@@ -658,7 +687,6 @@ async function confirmRenewal() {
 
         } catch (e) {
 
-            // Response không có JSON
             data = null;
 
         }
@@ -752,7 +780,6 @@ function showRenewMessage(message) {
 
 function showMessage(message) {
 
-    // Nếu HTML có element #message
     const element =
         document.getElementById("message");
 
@@ -784,7 +811,7 @@ function showMessage(message) {
 
 
     // Nếu HTML không có #message
-    // thì dùng alert để tránh lỗi JS
+    // thì dùng alert
 
     alert(message);
 
