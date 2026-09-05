@@ -1,4 +1,8 @@
 package com.group4.library.exception;
 
-public class InvalidReaderTypeException {
+/** Ném khi loại bạn đọc không thuộc STUDENT, PRIORITY_STUDENT, LECTURER. */
+public class InvalidReaderTypeException extends BusinessException {
+    public InvalidReaderTypeException(String type) {
+        super("Loại bạn đọc không hợp lệ: " + type);
+    }
 }

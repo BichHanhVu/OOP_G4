@@ -1,4 +1,3 @@
-// repository/json/JsonReaderRepository.java
 package com.group4.library.repository.json;
 
 import com.group4.library.model.LecturerReader;
@@ -7,6 +6,9 @@ import com.group4.library.model.Reader;
 import com.group4.library.model.StudentReader;
 import com.group4.library.repository.ReaderRepository;
 import com.group4.library.utils.JsonFileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,14 +18,12 @@ import java.util.stream.Collectors;
 @Repository
 public class JsonReaderRepository implements ReaderRepository {
 
-    private final String filePath;
+    private static final Logger log = LoggerFactory.getLogger(JsonReaderRepository.class);
 
-    public JsonReaderRepository() {
-        this("data/readers.json");
-    }
+    @Value("${reader.data.file:data/readers.json}")
+    private String filePath = "data/readers.json";
 
-    // Constructor phụ dùng cho test, trỏ tới file tạm thay vì data/readers.json thật
-    public JsonReaderRepository(String filePath) {
+    public void setFilePathForTest(String filePath) {
         this.filePath = filePath;
     }
 
@@ -44,35 +44,33 @@ public class JsonReaderRepository implements ReaderRepository {
 
     @Override
     public List<Reader> findAll() {
-        return JsonFileUtils.readList(filePath, ReaderRecord.class)
+        List<Reader> readers = JsonFileUtils.readList(filePath, ReaderRecord.class)
                 .stream().map(this::toModel).collect(Collectors.toList());
+        log.debug("Đọc {} bạn đọc từ {}", readers.size(), filePath);
+        return readers;
     }
 
     @Override
     public Optional<Reader> findById(String id) {
-        if (id == null) {
-            return Optional.empty();
-        }
-        return findAll().stream()
-                .filter(r -> id.equalsIgnoreCase(r.getId()))
-                .findFirst();
+        return findAll().stream().filter(r -> r.getId().equals(id)).findFirst();
     }
 
     @Override
     public Reader save(Reader reader) {
         List<ReaderRecord> records = JsonFileUtils.readList(filePath, ReaderRecord.class);
-        records.removeIf(r -> reader.getId().equalsIgnoreCase(r.id));
+        records.removeIf(r -> r.id.equals(reader.getId()));
         records.add(toRecord(reader));
         JsonFileUtils.writeList(filePath, records);
+        log.info("Đã lưu bạn đọc {}", reader.getId());
         return reader;
     }
 
     @Override
     public void deleteById(String id) {
-        if (id == null) return;
         List<ReaderRecord> records = JsonFileUtils.readList(filePath, ReaderRecord.class);
-        records.removeIf(r -> id.equalsIgnoreCase(r.id));
+        records.removeIf(r -> r.id.equals(id));
         JsonFileUtils.writeList(filePath, records);
+        log.info("Đã xóa bạn đọc {}", id);
     }
 
     @Override
@@ -81,24 +79,15 @@ public class JsonReaderRepository implements ReaderRepository {
     }
 
     private Reader toModel(ReaderRecord r) {
-        if (r.id == null || r.id.isBlank()) {
-            throw new IllegalStateException("Bản ghi bạn đọc không hợp lệ: thiếu id");
-        }
-        if (r.type == null || r.type.isBlank()) {
-            throw new IllegalStateException(
-                    "Bản ghi bạn đọc không hợp lệ (id=" + r.id + "): thiếu type");
-        }
         return switch (r.type) {
             case "STUDENT" -> new StudentReader(r.id, r.name, r.phoneNumber);
             case "PRIORITY_STUDENT" -> new PriorityStudentReader(r.id, r.name, r.phoneNumber);
             case "LECTURER" -> new LecturerReader(r.id, r.name, r.phoneNumber);
-            default -> throw new IllegalStateException(
-                    "Loại bạn đọc không hợp lệ (id=" + r.id + "): " + r.type);
+            default -> throw new IllegalStateException("Loại bạn đọc không hợp lệ: " + r.type);
         };
     }
 
     private ReaderRecord toRecord(Reader reader) {
-        return new ReaderRecord(reader.getId(), reader.getName(), reader.getPhoneNumber(),
-                reader.getType().name());
+        return new ReaderRecord(reader.getId(), reader.getName(), reader.getPhoneNumber(), reader.getType().name());
     }
 }

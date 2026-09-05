@@ -1,141 +1,111 @@
 <!doctype html>
 <html lang="vi">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Quản lý bạn đọc | Thư viện G4</title>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
-    />
-    <link rel="stylesheet" href="../css/style.css" />
-  </head>
-  <body>
-    <div class="app-layout">
-      <aside class="app-sidebar" id="appSidebar">
-        <div class="sidebar-brand">
-          <div class="sidebar-brand-icon"><i class="bi bi-book-half"></i></div>
-          <h1>THƯ VIỆN G4</h1>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý bạn đọc | Thư viện G4</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar" id="appSidebar">
+    <div class="sidebar-brand"><div class="sidebar-brand-icon"><i class="bi bi-book-half"></i></div><h1>THƯ VIỆN G4</h1></div>
+    <nav class="sidebar-menu">
+      <a class="sidebar-link" href="../index.html"><i class="bi bi-grid-1x2-fill"></i><span>Tổng quan</span></a>
+      <a class="sidebar-link active" href="readers.html"><i class="bi bi-people-fill"></i><span>Bạn đọc</span></a>
+      <a class="sidebar-link" href="books.html"><i class="bi bi-book-fill"></i><span>Sách</span></a>
+      <a class="sidebar-link" href="borrow.html"><i class="bi bi-journal-plus"></i><span>Mượn sách</span></a>
+      <a class="sidebar-link" href="tickets.html"><i class="bi bi-receipt"></i><span>Phiếu mượn</span></a>
+      <a class="sidebar-link" href="return.html"><i class="bi bi-arrow-return-left"></i><span>Trả sách</span></a>
+      <a class="sidebar-link" href="history.html"><i class="bi bi-clock-history"></i><span>Lịch sử</span></a>
+    </nav>
+  </aside>
+  <main class="app-main">
+    <header class="app-header">
+      <div style="display:flex;align-items:center;gap:14px">
+        <button class="menu-toggle" id="menuToggle" type="button"><i class="bi bi-list"></i></button>
+        <div class="header-title"><h1>Quản lý bạn đọc</h1><p>Thêm, sửa, tìm kiếm và phân loại bạn đọc</p></div>
+      </div>
+    </header>
+    <div class="page-content">
+      <div id="message"></div>
+      <section class="content-card">
+        <div class="card-header">
+          <div><h2 class="card-title">Danh sách bạn đọc</h2><p class="card-description">Tìm kiếm, lọc, sắp xếp và phân trang</p></div>
+          <button class="btn btn-primary" onclick="openCreateForm()"><i class="bi bi-person-plus"></i> Thêm bạn đọc</button>
         </div>
-        <nav class="sidebar-menu">
-          <a class="sidebar-link" href="../index.html"
-            ><i class="bi bi-grid-1x2-fill"></i><span>Tổng quan</span></a
-          >
-          <a class="sidebar-link active" href="readers.html"
-            ><i class="bi bi-people-fill"></i><span>Bạn đọc</span></a
-          >
-          <a class="sidebar-link" href="books.html"
-            ><i class="bi bi-book-fill"></i><span>Sách</span></a
-          >
-          <a class="sidebar-link" href="borrow.html"
-            ><i class="bi bi-journal-plus"></i><span>Mượn sách</span></a
-          >
-          <a class="sidebar-link" href="tickets.html"
-            ><i class="bi bi-receipt"></i><span>Phiếu mượn</span></a
-          >
-          <a class="sidebar-link" href="return.html"
-            ><i class="bi bi-arrow-return-left"></i><span>Trả sách</span></a
-          >
-          <a class="sidebar-link" href="history.html"
-            ><i class="bi bi-clock-history"></i><span>Lịch sử</span></a
-          >
-        </nav>
-      </aside>
-      <main class="app-main">
-        <header class="app-header">
-          <div style="display: flex; align-items: center; gap: 14px">
-            <button class="menu-toggle" id="menuToggle" type="button">
-              <i class="bi bi-list"></i>
-            </button>
-            <div class="header-title">
-              <h1>Quản lý bạn đọc</h1>
-              <p>Thêm, sửa, tìm kiếm và phân loại bạn đọc</p>
-            </div>
+        <div class="toolbar">
+          <div class="toolbar" style="margin-top:8px">
+            <input type="file" id="importFileInput" accept=".csv">
+            <button class="btn btn-primary" onclick="importCsv()"><i class="bi bi-upload"></i> Import CSV</button>
+            <a class="btn btn-outline" href="/api/readers/export" download="readers.csv"><i class="bi bi-download"></i> Export CSV</a>
           </div>
-        </header>
-        <div class="page-content">
-          <div id="message"></div>
-          <section class="content-card">
-            <div class="card-header">
-              <div>
-                <h2 class="card-title">Danh sách bạn đọc</h2>
-                <p class="card-description">
-                  Tìm kiếm và quản lý thông tin bạn đọc
-                </p>
-              </div>
-              <button class="btn btn-primary" onclick="openCreateForm()">
-                <i class="bi bi-person-plus"></i> Thêm bạn đọc
-              </button>
-            </div>
-            <div class="toolbar">
-              <input id="searchInput" placeholder="Tìm theo mã hoặc tên..." />
-              <select id="filterType" onchange="searchReaders()">
-                <option value="">Tất cả loại</option>
-                <option value="STUDENT">Sinh viên thường</option>
-                <option value="PRIORITY_STUDENT">Sinh viên ưu tiên</option>
-                <option value="LECTURER">Giảng viên</option>
-              </select>
-              <button class="btn btn-primary" onclick="searchReaders()">
-                <i class="bi bi-search"></i> Tìm
-              </button>
-            </div>
-            <div class="table-wrapper">
-              <table id="readerTable">
-                <thead>
-                  <tr>
-                    <th>Mã</th>
-                    <th>Họ tên</th>
-                    <th>SĐT</th>
-                    <th>Loại</th>
-                    <th>Giới hạn</th>
-                    <th>Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody id="readerTableBody"></tbody>
-              </table>
-            </div>
-          </section>
-          <section
-            id="readerForm"
-            class="content-card"
-            style="display: none; margin-top: 20px"
-          >
-            <div class="card-header">
-              <h2 class="card-title" id="formTitle">Thêm bạn đọc</h2>
-            </div>
-            <input type="hidden" id="editingId" />
-            <div class="form-group">
-              <label class="form-label" for="nameInput">Họ tên</label
-              ><input id="nameInput" placeholder="Nhập họ tên" />
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="phoneInput">Số điện thoại</label
-              ><input id="phoneInput" placeholder="Nhập số điện thoại" />
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="typeInput">Loại bạn đọc</label>
-              <select id="typeInput">
-                <option value="STUDENT">Sinh viên thường (3 cuốn)</option>
-                <option value="PRIORITY_STUDENT">
-                  Sinh viên ưu tiên (5 cuốn)
-                </option>
-                <option value="LECTURER">Giảng viên (7 cuốn)</option>
-              </select>
-            </div>
-            <button class="btn btn-primary" onclick="submitForm()">Lưu</button>
-            <button class="btn btn-outline" onclick="closeForm()">Hủy</button>
-          </section>
+          <div id="importResult" style="display:none;margin-top:12px"></div>
+          <input id="searchInput" placeholder="Tìm theo mã, tên hoặc SĐT...">
+          <select id="filterType" onchange="onFilterChanged()">
+            <option value="">Tất cả loại</option>
+            <option value="STUDENT">Sinh viên thường</option>
+            <option value="PRIORITY_STUDENT">Sinh viên ưu tiên</option>
+            <option value="LECTURER">Giảng viên</option>
+          </select>
+          <select id="sortBy" onchange="onFilterChanged()">
+            <option value="id">Sắp xếp theo mã</option>
+            <option value="name">Sắp xếp theo tên</option>
+          </select>
+          <select id="sortDirection" onchange="onFilterChanged()">
+            <option value="asc">Tăng dần</option>
+            <option value="desc">Giảm dần</option>
+          </select>
+          <select id="pageSize" onchange="onFilterChanged()">
+            <option value="5">5 / trang</option>
+            <option value="10" selected>10 / trang</option>
+            <option value="20">20 / trang</option>
+          </select>
+          <button class="btn btn-primary" onclick="onFilterChanged()"><i class="bi bi-search"></i> Tìm</button>
         </div>
-      </main>
+        <div class="table-wrapper">
+          <table id="readerTable">
+            <thead><tr><th>Mã</th><th>Họ tên</th><th>SĐT</th><th>Loại</th><th>Giới hạn</th><th>Thao tác</th></tr></thead>
+            <tbody id="readerTableBody"></tbody>
+          </table>
+          <div id="emptyState" class="empty-state" style="display:none">
+            <i class="bi bi-inbox"></i>
+            <p>Không tìm thấy bạn đọc phù hợp</p>
+          </div>
+        </div>
+        <div class="pagination-bar">
+          <span id="pageInfo"></span>
+          <div class="pagination-controls">
+            <button class="btn btn-outline" id="prevPageBtn" onclick="goToPage(currentPage - 1)"><i class="bi bi-chevron-left"></i> Trước</button>
+            <button class="btn btn-outline" id="nextPageBtn" onclick="goToPage(currentPage + 1)">Sau <i class="bi bi-chevron-right"></i></button>
+          </div>
+        </div>
+      </section>
+      <section id="readerForm" class="content-card" style="display:none;margin-top:20px">
+        <div class="card-header"><h2 class="card-title" id="formTitle">Thêm bạn đọc</h2></div>
+        <input type="hidden" id="editingId">
+        <div class="form-group"><label class="form-label" for="nameInput">Họ tên</label><input id="nameInput" placeholder="Nhập họ tên"></div>
+        <div class="form-group"><label class="form-label" for="phoneInput">Số điện thoại</label><input id="phoneInput" placeholder="Nhập số điện thoại"></div>
+        <div class="form-group"><label class="form-label" for="typeInput">Loại bạn đọc</label>
+          <select id="typeInput">
+            <option value="STUDENT">Sinh viên thường (3 cuốn)</option>
+            <option value="PRIORITY_STUDENT">Sinh viên ưu tiên (5 cuốn)</option>
+            <option value="LECTURER">Giảng viên (7 cuốn)</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="submitForm()">Lưu</button>
+        <button class="btn btn-outline" onclick="closeForm()">Hủy</button>
+      </section>
     </div>
-    <script src="../js/api.js"></script>
-    <script src="../js/readers.js"></script>
-    <script>
-      const menuToggle = document.getElementById("menuToggle");
-      const appSidebar = document.getElementById("appSidebar");
-      menuToggle.addEventListener("click", () =>
-        appSidebar.classList.toggle("open"),
-      );
-    </script>
-  </body>
+  </main>
+</div>
+<script src="../js/api.js"></script>
+<script src="../js/readers.js"></script>
+<script>
+  const menuToggle = document.getElementById("menuToggle");
+  const appSidebar = document.getElementById("appSidebar");
+  menuToggle.addEventListener("click", () => appSidebar.classList.toggle("open"));
+</script>
+</body>
 </html>
