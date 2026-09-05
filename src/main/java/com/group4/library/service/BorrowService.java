@@ -21,6 +21,10 @@ import com.group4.library.repository.BookRepository;
 import com.group4.library.repository.BorrowTicketRepository;
 import com.group4.library.repository.ReaderRepository;
 
+import com.group4.library.dto.RenewTicketRequest;
+import com.group4.library.dto.RenewTicketResponse;
+import com.group4.library.exception.RenewalNotAllowedException;
+
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -219,6 +223,7 @@ public class BorrowService {
         resp.setDueDate(ticket.getDueDate());
         resp.setReturnDate(ticket.getReturnDate());
         resp.setStatus(ticket.getStatus());
+        resp.setRenewalCount(ticket.getRenewalCount());
 
         if (ticket.getItems() != null) {
             List<BorrowItemResponse> itemDtos = ticket.getItems().stream()
@@ -228,5 +233,92 @@ public class BorrowService {
             resp.setItems(itemDtos);
         }
         return resp;
+    }
+    public RenewTicketResponse renewBorrowTicket(
+            String ticketId,
+            RenewTicketRequest request) {
+
+        // 1. Kiểm tra request
+        if (request == null) {
+            throw new RenewalNotAllowedException(
+                    "Thông tin gia hạn không được để trống"
+            );
+        }
+
+        if (request.getNewDueDate() == null) {
+            throw new RenewalNotAllowedException(
+                    "Ngày hẹn trả mới không được để trống"
+            );
+        }
+
+        // 2. Tìm phiếu
+        BorrowTicket ticket = borrowTicketRepository.findById(ticketId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Không tìm thấy phiếu mượn: " + ticketId
+                        )
+                );
+
+        // 3. Chỉ BORROWING mới được gia hạn
+        if (ticket.getStatus() != TicketStatus.BORROWING) {
+            throw new RenewalNotAllowedException(
+                    "Chỉ phiếu đang mượn mới được gia hạn"
+            );
+        }
+
+        LocalDate today = LocalDate.now();
+
+        // 4. Không cho gia hạn phiếu đã quá hạn
+        if (ticket.getDueDate() != null
+                && ticket.getDueDate().isBefore(today)) {
+
+            throw new RenewalNotAllowedException(
+                    "Không thể gia hạn phiếu đã quá hạn"
+            );
+        }
+
+        // 5. Chỉ được gia hạn một lần
+        if (ticket.getRenewalCount() >= 1) {
+            throw new RenewalNotAllowedException(
+                    "Phiếu mượn này đã được gia hạn trước đó"
+            );
+        }
+
+        LocalDate oldDueDate = ticket.getDueDate();
+        LocalDate newDueDate = request.getNewDueDate();
+
+        // 6. Ngày mới phải sau hạn cũ
+        if (!newDueDate.isAfter(oldDueDate)) {
+            throw new RenewalNotAllowedException(
+                    "Ngày hẹn trả mới phải sau ngày hẹn trả hiện tại"
+            );
+        }
+
+        // 7. Ngày mới không được trước ngày hiện tại
+        if (newDueDate.isBefore(today)) {
+            throw new RenewalNotAllowedException(
+                    "Ngày hẹn trả mới không được trước ngày hiện tại"
+            );
+        }
+
+        // 8. Cập nhật phiếu
+        ticket.setDueDate(newDueDate);
+        ticket.setRenewalCount(ticket.getRenewalCount() + 1);
+
+        // 9. Lưu lại
+        BorrowTicket savedTicket =
+                borrowTicketRepository.save(ticket);
+
+        // 10. Tạo response riêng cho thao tác gia hạn
+        RenewTicketResponse response =
+                new RenewTicketResponse();
+
+        response.setTicketId(savedTicket.getTicketId());
+        response.setOldDueDate(oldDueDate);
+        response.setNewDueDate(savedTicket.getDueDate());
+        response.setRenewalCount(savedTicket.getRenewalCount());
+        response.setStatus(savedTicket.getStatus());
+
+        return response;
     }
 }

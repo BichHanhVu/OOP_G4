@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BorrowTicket {
+
     private String ticketId;
     private String readerId;
     private LocalDate borrowDate;
@@ -15,29 +16,52 @@ public class BorrowTicket {
     private TicketStatus status;
     private List<BorrowTicketDetail> items;
 
-    // Constructor không tham số (Dùng cho Jackson/JSON)
+    // Số lần đã gia hạn
+    private int renewalCount;
+
+    // Constructor không tham số - dùng cho Jackson/JSON
     public BorrowTicket() {
+        this.renewalCount = 0;
     }
 
-    // Constructor đầy đủ tham số (Đã bổ sung validation theo yêu cầu mục 7)
-    public BorrowTicket(String ticketId, String readerId, LocalDate borrowDate, LocalDate dueDate,
-                        LocalDate returnDate, TicketStatus status, List<BorrowTicketDetail> items) {
+    // Constructor đầy đủ tham số
+    public BorrowTicket(
+            String ticketId,
+            String readerId,
+            LocalDate borrowDate,
+            LocalDate dueDate,
+            LocalDate returnDate,
+            TicketStatus status,
+            List<BorrowTicketDetail> items) {
+
         if (ticketId == null || ticketId.isBlank()) {
-            throw new IllegalArgumentException("Mã phiếu mượn không được để trống");
-        }
-        if (readerId == null || readerId.isBlank()) {
-            throw new IllegalArgumentException("Mã bạn đọc không được để trống");
-        }
-        if (borrowDate == null) {
-            throw new IllegalArgumentException("Ngày mượn không được để trống");
-        }
-        if (dueDate == null) {
-            throw new IllegalArgumentException("Hạn trả không được để trống");
+            throw new IllegalArgumentException(
+                    "Mã phiếu mượn không được để trống"
+            );
         }
 
-        // 1. Kiểm tra dueDate không trước borrowDate
+        if (readerId == null || readerId.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Mã bạn đọc không được để trống"
+            );
+        }
+
+        if (borrowDate == null) {
+            throw new IllegalArgumentException(
+                    "Ngày mượn không được để trống"
+            );
+        }
+
+        if (dueDate == null) {
+            throw new IllegalArgumentException(
+                    "Hạn trả không được để trống"
+            );
+        }
+
         if (dueDate.isBefore(borrowDate)) {
-            throw new InvalidBorrowDateException("Hạn trả không được trước ngày mượn");
+            throw new InvalidBorrowDateException(
+                    "Hạn trả không được trước ngày mượn"
+            );
         }
 
         this.ticketId = ticketId.trim();
@@ -46,14 +70,18 @@ public class BorrowTicket {
         this.dueDate = dueDate;
         this.returnDate = returnDate;
 
-        // 2. Nếu status == null thì đặt mặc định BORROWING
-        this.status = (status != null) ? status : TicketStatus.BORROWING;
+        this.status = status != null
+                ? status
+                : TicketStatus.BORROWING;
 
-        // 3. Sao chép danh sách item để tránh bị sửa từ bên ngoài (defensive copy)
-        this.items = (items != null) ? new ArrayList<>(items) : new ArrayList<>();
+        this.items = items != null
+                ? new ArrayList<>(items)
+                : new ArrayList<>();
+
+        // Phiếu mới chưa từng gia hạn
+        this.renewalCount = 0;
     }
 
-    // Getters & Setters
     public String getTicketId() {
         return ticketId;
     }
@@ -83,9 +111,16 @@ public class BorrowTicket {
     }
 
     public void setDueDate(LocalDate dueDate) {
-        if (borrowDate != null && dueDate != null && dueDate.isBefore(borrowDate)) {
-            throw new InvalidBorrowDateException("Hạn trả không được trước ngày mượn");
+
+        if (borrowDate != null
+                && dueDate != null
+                && dueDate.isBefore(borrowDate)) {
+
+            throw new InvalidBorrowDateException(
+                    "Hạn trả không được trước ngày mượn"
+            );
         }
+
         this.dueDate = dueDate;
     }
 
@@ -102,7 +137,9 @@ public class BorrowTicket {
     }
 
     public void setStatus(TicketStatus status) {
-        this.status = (status != null) ? status : TicketStatus.BORROWING;
+        this.status = status != null
+                ? status
+                : TicketStatus.BORROWING;
     }
 
     public List<BorrowTicketDetail> getItems() {
@@ -110,6 +147,22 @@ public class BorrowTicket {
     }
 
     public void setItems(List<BorrowTicketDetail> items) {
-        this.items = (items != null) ? new ArrayList<>(items) : new ArrayList<>();
+        this.items = items != null
+                ? new ArrayList<>(items)
+                : new ArrayList<>();
+    }
+
+    public int getRenewalCount() {
+        return renewalCount;
+    }
+
+    public void setRenewalCount(int renewalCount) {
+        if (renewalCount < 0) {
+            throw new IllegalArgumentException(
+                    "Số lần gia hạn không được âm"
+            );
+        }
+
+        this.renewalCount = renewalCount;
     }
 }
