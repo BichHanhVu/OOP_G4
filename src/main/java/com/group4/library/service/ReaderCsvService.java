@@ -59,6 +59,9 @@ public class ReaderCsvService {
 
     public String exportToCsv() {
         StringBuilder csv = new StringBuilder();
+        // Thêm BOM UTF-8 để Excel hiển thị đúng tiếng Việt có dấu (trước đây bị thiếu,
+        // không đồng nhất với BookService.exportBooks() vốn đã có BOM)
+        csv.append("\uFEFF");
         csv.append("id,name,phoneNumber,type,maxBorrowLimit\n");
 
         for (ReaderResponse r : readerService.getAllForExport()) {

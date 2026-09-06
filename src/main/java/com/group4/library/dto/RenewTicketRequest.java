@@ -9,6 +9,10 @@ public class RenewTicketRequest {
     public RenewTicketRequest() {
     }
 
+    public RenewTicketRequest(LocalDate newDueDate) {
+        this.newDueDate = newDueDate;
+    }
+
     public LocalDate getNewDueDate() {
         return newDueDate;
     }

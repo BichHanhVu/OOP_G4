@@ -1,10 +1,12 @@
 package com.group4.library.handler;
 
 import com.group4.library.dto.PagedReaderResponse;
+import com.group4.library.dto.ReaderDetailResponse;
 import com.group4.library.dto.ReaderImportSummary;
 import com.group4.library.dto.ReaderRequest;
 import com.group4.library.dto.ReaderResponse;
 import com.group4.library.dto.ReaderSearchRequest;
+import com.group4.library.dto.ReaderStatisticsResponse;
 import com.group4.library.exception.BusinessException;
 import com.group4.library.service.ReaderCsvService;
 import com.group4.library.service.ReaderService;
@@ -53,9 +55,19 @@ public class ReaderHandler {
         return ResponseEntity.ok(readerService.search(request));
     }
 
+    @GetMapping("/statistics")
+    public ResponseEntity<ReaderStatisticsResponse> getStatistics() {
+        return ResponseEntity.ok(readerService.getStatistics());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ReaderResponse> getById(@PathVariable String id) {
         return ResponseEntity.ok(readerService.getById(id));
+    }
+
+    @GetMapping("/{id}/detail")
+    public ResponseEntity<ReaderDetailResponse> getDetail(@PathVariable String id) {
+        return ResponseEntity.ok(readerService.getDetail(id));
     }
 
     @PostMapping

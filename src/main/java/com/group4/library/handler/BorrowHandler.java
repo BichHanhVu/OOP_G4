@@ -2,6 +2,7 @@ package com.group4.library.handler;
 
 import com.group4.library.dto.BorrowRequest;
 import com.group4.library.dto.BorrowTicketResponse;
+import com.group4.library.dto.RenewTicketRequest;
 import com.group4.library.model.TicketStatus;
 import com.group4.library.service.BorrowService;
 import org.springframework.http.HttpStatus;
@@ -54,7 +55,16 @@ public class BorrowHandler {
         BorrowTicketResponse ticket = borrowService.getTicketById(id);
         return ResponseEntity.ok(ticket);
     }
+
     /**
+     * POST /api/borrow-tickets/{id}/cancel
+     * Hủy một phiếu mượn đang ở trạng thái BORROWING, hoàn trả tồn kho sách.
+     */
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<BorrowTicketResponse> cancelTicket(@PathVariable("id") String id) {
+        return ResponseEntity.ok(borrowService.cancelTicket(id));
+    }
+  
      * PATCH /api/borrow-tickets/{id}/renew
      * Gia hạn phiếu mượn
      */

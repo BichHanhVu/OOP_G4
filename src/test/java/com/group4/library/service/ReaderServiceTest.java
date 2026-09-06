@@ -9,10 +9,10 @@ import com.group4.library.exception.EmptyReaderNameException;
 import com.group4.library.exception.InvalidPhoneNumberException;
 import com.group4.library.exception.InvalidReaderTypeException;
 import com.group4.library.exception.ReaderNotFoundException;
+import com.group4.library.repository.BookRepository;
+import com.group4.library.repository.BorrowTicketRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import com.group4.library.repository.BorrowTicketRepository;
 import org.mockito.Mockito;
 
 import java.util.List;
@@ -34,7 +34,8 @@ class ReaderServiceTest {
 
         readerService = new ReaderService(
                 repository,
-                borrowTicketRepository
+                borrowTicketRepository,
+                Mockito.mock(BookRepository.class)
         );
     }
 
@@ -173,18 +174,6 @@ class ReaderServiceTest {
         assertThrows(ReaderNotFoundException.class, () -> readerService.getById("R999"));
     }
 
-    private ReaderRequest buildRequest(String id, String name, String phone, String type) {
-        ReaderRequest request = new ReaderRequest();
-        request.setId(id);
-        request.setName(name);
-        request.setPhoneNumber(phone);
-        request.setType(type);
-        return request;
-    }
-
-    private PagedReaderResponse<ReaderResponse> search(String keyword, String type) {
-        return readerService.search(new ReaderSearchRequest(keyword, type, null, null, null, 100));
-    }
     @Test
     void xoaBanDoc_conPhieuDangMuon_nemBusinessException() {
         readerService.create(buildRequest("R001", "Nguyễn Văn A", "0912345678", "STUDENT"));
@@ -208,5 +197,18 @@ class ReaderServiceTest {
         readerService.delete("R001");
 
         assertThrows(ReaderNotFoundException.class, () -> readerService.getById("R001"));
+    }
+
+    private ReaderRequest buildRequest(String id, String name, String phone, String type) {
+        ReaderRequest request = new ReaderRequest();
+        request.setId(id);
+        request.setName(name);
+        request.setPhoneNumber(phone);
+        request.setType(type);
+        return request;
+    }
+
+    private PagedReaderResponse<ReaderResponse> search(String keyword, String type) {
+        return readerService.search(new ReaderSearchRequest(keyword, type, null, null, null, 100));
     }
 }

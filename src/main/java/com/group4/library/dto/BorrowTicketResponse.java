@@ -81,4 +81,12 @@ public class BorrowTicketResponse {
     public void setItems(List<BorrowItemResponse> items) {
         this.items = items;
     }
+
+    public int getRenewalCount() {
+        return renewalCount;
+    }
+
+    public void setRenewalCount(int renewalCount) {
+        this.renewalCount = renewalCount;
+    }
 }

@@ -6,6 +6,7 @@ import com.group4.library.dto.ReaderResponse;
 import com.group4.library.dto.ReaderSearchRequest;
 import com.group4.library.exception.DuplicateReaderIdException;
 import com.group4.library.exception.ReaderNotFoundException;
+import com.group4.library.repository.BookRepository;
 import com.group4.library.repository.BorrowTicketRepository;
 import com.group4.library.repository.json.JsonReaderRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +41,7 @@ class ReaderServiceIntegrationTest {
         Mockito.when(borrowTicketRepository.findByReaderIdAndStatus(Mockito.anyString(), Mockito.any()))
                 .thenReturn(List.of());
 
-        readerService = new ReaderService(repository, borrowTicketRepository);
+        readerService = new ReaderService(repository, borrowTicketRepository, Mockito.mock(BookRepository.class));
     }
 
     @Test
@@ -57,7 +58,7 @@ class ReaderServiceIntegrationTest {
     void themBanDoc_maTrung_phatHienDungQuaFileThat() {
         readerService.create(buildRequest("R001", "Nguyễn Văn A", "0912345678", "STUDENT"));
 
-        ReaderService serviceKhac = new ReaderService(repository, borrowTicketRepository);
+        ReaderService serviceKhac = new ReaderService(repository, borrowTicketRepository, Mockito.mock(BookRepository.class));
         ReaderRequest trung = buildRequest("R001", "Trần Thị B", "0987654321", "LECTURER");
 
         assertThrows(DuplicateReaderIdException.class, () -> serviceKhac.create(trung));
@@ -97,7 +98,7 @@ class ReaderServiceIntegrationTest {
     void khoiTaoServiceMoi_vanDocDuocDuLieuServiceTruocDaGhi() {
         readerService.create(buildRequest("R001", "Nguyễn Văn A", "0912345678", "STUDENT"));
 
-        ReaderService serviceMoi = new ReaderService(repository, borrowTicketRepository);
+        ReaderService serviceMoi = new ReaderService(repository, borrowTicketRepository, Mockito.mock(BookRepository.class));
         ReaderResponse ketQua = serviceMoi.getById("R001");
 
         assertEquals("Nguyễn Văn A", ketQua.getName());
