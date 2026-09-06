@@ -18,8 +18,6 @@ public class BorrowTicket {
     // Số lần phiếu đã được gia hạn (mặc định 0, tăng dần mỗi lần gọi renewTicket)
     private int renewalCount = 0;
 
-    // Số lần đã gia hạn
-    private int renewalCount;
 
     // Constructor không tham số - dùng cho Jackson/JSON
     public BorrowTicket() {
@@ -165,14 +163,6 @@ public class BorrowTicket {
             );
         }
 
-        this.renewalCount = renewalCount;
-    }
-
-    public int getRenewalCount() {
-        return renewalCount;
-    }
-
-    public void setRenewalCount(int renewalCount) {
         this.renewalCount = renewalCount;
     }
 }

@@ -64,7 +64,9 @@ public class BorrowHandler {
     public ResponseEntity<BorrowTicketResponse> cancelTicket(@PathVariable("id") String id) {
         return ResponseEntity.ok(borrowService.cancelTicket(id));
     }
-  
+
+
+    /**
      * PATCH /api/borrow-tickets/{id}/renew
      * Gia hạn phiếu mượn
      */
