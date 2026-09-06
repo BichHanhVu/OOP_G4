@@ -8,6 +8,9 @@ public class ReturnRecord {
     private LocalDate actualReturnDate;
     private long lateDays;
     private long fineAmount;
+    // Đánh dấu tiền phạt đã được thu hay chưa, và ngày thu (nếu có)
+    private boolean paid = false;
+    private LocalDate paidDate;
 
     public ReturnRecord() {}
 
@@ -30,4 +33,8 @@ public class ReturnRecord {
     public void setLateDays(long lateDays) { this.lateDays = lateDays; }
     public long getFineAmount() { return fineAmount; }
     public void setFineAmount(long fineAmount) { this.fineAmount = fineAmount; }
+    public boolean isPaid() { return paid; }
+    public void setPaid(boolean paid) { this.paid = paid; }
+    public LocalDate getPaidDate() { return paidDate; }
+    public void setPaidDate(LocalDate paidDate) { this.paidDate = paidDate; }
 }

@@ -21,8 +21,18 @@ public class ReturnHandler {
         return ResponseEntity.ok(returnService.getAll());
     }
 
+    @GetMapping("/unpaid")
+    public ResponseEntity<List<ReturnResponse>> getUnpaidFines() {
+        return ResponseEntity.ok(returnService.getUnpaidFines());
+    }
+
     @PostMapping
     public ResponseEntity<ReturnResponse> returnBooks(@RequestBody ReturnRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(returnService.returnBooks(request));
+    }
+
+    @PostMapping("/{id}/pay")
+    public ResponseEntity<ReturnResponse> payFine(@PathVariable("id") String id) {
+        return ResponseEntity.ok(returnService.payFine(id));
     }
 }

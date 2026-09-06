@@ -3,7 +3,9 @@ package com.group4.library.service;
 import com.group4.library.dto.ReturnRequest;
 import com.group4.library.dto.ReturnResponse;
 import com.group4.library.exception.BusinessException;
+import com.group4.library.exception.FineAlreadyPaidException;
 import com.group4.library.exception.ResourceNotFoundException;
+import com.group4.library.exception.ReturnRecordNotFoundException;
 import com.group4.library.exception.TicketAlreadyReturnedException;
 import com.group4.library.exception.TicketNotFoundException;
 import com.group4.library.model.Book;
@@ -131,8 +133,38 @@ public class ReturnService {
 
     private ReturnResponse toResponse(ReturnRecord r) {
         return new ReturnResponse(r.getReturnId(), r.getTicketId(), r.getActualReturnDate(),
-                r.getLateDays(), r.getFineAmount());
+                r.getLateDays(), r.getFineAmount(), r.isPaid(), r.getPaidDate());
     }
 
     private record BookUpdate(Book book, int quantity) {}
+
+    // ===================== Thanh toán tiền phạt =====================
+
+    public ReturnResponse payFine(String returnId) {
+        if (returnId == null || returnId.trim().isEmpty()) {
+            throw new BusinessException("Mã phiếu trả không được để trống");
+        }
+
+        ReturnRecord record = returnRepository.findById(returnId.trim())
+                .orElseThrow(() -> new ReturnRecordNotFoundException(
+                        "Không tìm thấy phiếu trả với mã: " + returnId));
+
+        if (record.isPaid()) {
+            throw new FineAlreadyPaidException(
+                    "Tiền phạt của phiếu trả '" + returnId + "' đã được thanh toán trước đó");
+        }
+
+        record.setPaid(true);
+        record.setPaidDate(LocalDate.now());
+
+        ReturnRecord saved = returnRepository.save(record);
+        return toResponse(saved);
+    }
+
+    public List<ReturnResponse> getUnpaidFines() {
+        return returnRepository.findAll().stream()
+                .filter(r -> r.getFineAmount() > 0 && !r.isPaid())
+                .map(this::toResponse)
+                .toList();
+    }
 }

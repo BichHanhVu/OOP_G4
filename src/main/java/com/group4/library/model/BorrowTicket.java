@@ -14,6 +14,8 @@ public class BorrowTicket {
     private LocalDate returnDate;
     private TicketStatus status;
     private List<BorrowTicketDetail> items;
+    // Số lần phiếu đã được gia hạn (mặc định 0, tăng dần mỗi lần gọi renewTicket)
+    private int renewalCount = 0;
 
     // Constructor không tham số (Dùng cho Jackson/JSON)
     public BorrowTicket() {
@@ -111,5 +113,13 @@ public class BorrowTicket {
 
     public void setItems(List<BorrowTicketDetail> items) {
         this.items = (items != null) ? new ArrayList<>(items) : new ArrayList<>();
+    }
+
+    public int getRenewalCount() {
+        return renewalCount;
+    }
+
+    public void setRenewalCount(int renewalCount) {
+        this.renewalCount = renewalCount;
     }
 }

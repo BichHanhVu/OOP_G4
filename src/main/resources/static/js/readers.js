@@ -55,8 +55,12 @@ function renderPagination(result) {
     document.getElementById("nextPageBtn").disabled = !result.hasNext;
 }
 
+function readerTypeLabel() {
+    return { STUDENT: "Sinh viên thường", PRIORITY_STUDENT: "Sinh viên ưu tiên", LECTURER: "Giảng viên" };
+}
+
 function renderTable(readers) {
-    const typeLabel = { STUDENT: "Sinh viên thường", PRIORITY_STUDENT: "Sinh viên ưu tiên", LECTURER: "Giảng viên" };
+    const typeLabel = readerTypeLabel();
     const tbody = document.getElementById("readerTableBody");
     const emptyState = document.getElementById("emptyState");
     tbody.innerHTML = "";
@@ -87,6 +91,11 @@ function renderTable(readers) {
         actionTd.style.display = "flex";
         actionTd.style.gap = "8px";
 
+        const detailBtn = document.createElement("button");
+        detailBtn.className = "btn btn-outline";
+        detailBtn.innerHTML = '<i class="bi bi-eye"></i> Chi tiết';
+        detailBtn.onclick = () => openDetail(r.id);
+
         const editBtn = document.createElement("button");
         editBtn.className = "btn btn-secondary";
         editBtn.innerHTML = '<i class="bi bi-pencil"></i> Sửa';
@@ -97,6 +106,7 @@ function renderTable(readers) {
         deleteBtn.innerHTML = '<i class="bi bi-trash"></i> Xóa';
         deleteBtn.onclick = () => deleteReader(r.id);
 
+        actionTd.appendChild(detailBtn);
         actionTd.appendChild(editBtn);
         actionTd.appendChild(deleteBtn);
         tr.appendChild(actionTd);
@@ -155,6 +165,7 @@ async function submitForm() {
         }
         closeForm();
         loadReaders();
+        loadStatistics();
     } catch (e) {
         showMessage(e.message, true);
     }
@@ -166,6 +177,7 @@ async function deleteReader(id) {
         await apiRequest(`/readers/${id}`, { method: "DELETE" });
         showMessage("Xóa thành công");
         loadReaders();
+        loadStatistics();
     } catch (e) {
         showMessage(e.message, true);
     }
@@ -179,6 +191,7 @@ function showMessage(text, isError = false) {
         el.textContent = "";
     }, 3000);
 }
+
 async function importCsv() {
     const fileInput = document.getElementById("importFileInput");
     if (!fileInput.files.length) {
@@ -200,6 +213,7 @@ async function importCsv() {
         showMessage(`Import xong: ${summary.successCount}/${summary.totalRows} thành công`);
         fileInput.value = "";
         loadReaders();
+        loadStatistics();
     } catch (e) {
         showMessage(e.message, true);
     }
@@ -232,4 +246,114 @@ function renderImportSummary(summary) {
         el.appendChild(table);
     }
 }
-document.addEventListener("DOMContentLoaded", () => loadReaders());
+
+async function loadStatistics() {
+    try {
+        const stats = await apiRequest("/readers/statistics");
+        document.getElementById("statTotalReaders").textContent = stats.totalReaders;
+        document.getElementById("statBorrowing").textContent = stats.currentlyBorrowingReaderCount;
+        document.getElementById("statOverdue").textContent = stats.overdueReaderCount;
+        document.getElementById("statReachedLimit").textContent = stats.reachedLimitReaderCount;
+        renderStatsByType(stats.countByType);
+    } catch (e) {
+        showMessage(e.message, true);
+    }
+}
+
+function renderStatsByType(countByType) {
+    const typeLabel = readerTypeLabel();
+    const tbody = document.getElementById("statsByTypeBody");
+    tbody.innerHTML = "";
+
+    Object.keys(countByType).forEach(type => {
+        const tr = document.createElement("tr");
+
+        const tdType = document.createElement("td");
+        tdType.textContent = typeLabel[type] || type;
+
+        const tdCount = document.createElement("td");
+        tdCount.textContent = countByType[type];
+
+        tr.appendChild(tdType);
+        tr.appendChild(tdCount);
+        tbody.appendChild(tr);
+    });
+}
+
+async function openDetail(id) {
+    try {
+        const detail = await apiRequest(`/readers/${id}/detail`);
+        const typeLabel = readerTypeLabel();
+
+        document.getElementById("detailReaderName").textContent = `${detail.name} (${detail.id})`;
+        document.getElementById("detailReaderMeta").textContent =
+            `${typeLabel[detail.type] || detail.type} — SĐT: ${detail.phoneNumber} — Giới hạn mượn: ${detail.maxBorrowLimit}`;
+
+        renderDetailSummary(detail.borrowSummary);
+        renderDetailTickets(detail.borrowSummary.tickets);
+
+        document.getElementById("readerDetailPanel").style.display = "block";
+        document.getElementById("readerDetailPanel").scrollIntoView({ behavior: "smooth" });
+    } catch (e) {
+        showMessage(e.message, true);
+    }
+}
+
+function renderDetailSummary(summary) {
+    const summaryEl = document.getElementById("detailSummary");
+    summaryEl.innerHTML = "";
+
+    const items = [
+        ["Đang giữ", summary.currentlyBorrowedCount],
+        ["Phiếu đang mượn", summary.activeTicketCount],
+        ["Phiếu quá hạn", summary.overdueTicketCount],
+        ["Đã đạt giới hạn mượn", summary.reachedLimit ? "Có" : "Không"],
+    ];
+
+    items.forEach(([label, value]) => {
+        const p = document.createElement("p");
+        p.textContent = `${label}: ${value}`;
+        summaryEl.appendChild(p);
+    });
+}
+
+function renderDetailTickets(tickets) {
+    const tbody = document.getElementById("detailTicketsBody");
+    const emptyState = document.getElementById("detailEmptyState");
+    tbody.innerHTML = "";
+
+    if (tickets.length === 0) {
+        emptyState.style.display = "block";
+        return;
+    }
+    emptyState.style.display = "none";
+
+    tickets.forEach(t => {
+        const tr = document.createElement("tr");
+        if (t.overdue) {
+            tr.style.color = "#c0392b";
+        }
+
+        const cells = [t.ticketId, t.borrowDate, t.dueDate, t.status + (t.overdue ? " (quá hạn)" : "")];
+        cells.forEach(value => {
+            const td = document.createElement("td");
+            td.textContent = value;
+            tr.appendChild(td);
+        });
+
+        const tdBooks = document.createElement("td");
+        tdBooks.textContent = t.books.map(b => `${b.title} x${b.quantity}`).join(", ");
+        tr.appendChild(tdBooks);
+
+        tbody.appendChild(tr);
+    });
+}
+
+function closeDetail() {
+    document.getElementById("readerDetailPanel").style.display = "none";
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    loadReaders();
+    loadStatistics();
+});

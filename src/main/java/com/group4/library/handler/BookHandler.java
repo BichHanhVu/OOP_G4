@@ -1,7 +1,9 @@
 package com.group4.library.handler;
 
+import com.group4.library.dto.BookDetailResponse;
 import com.group4.library.dto.BookRequest;
 import com.group4.library.dto.BookResponse;
+import com.group4.library.dto.BookStatisticsResponse;
 import com.group4.library.service.BookService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -10,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -32,9 +33,19 @@ public class BookHandler {
         return ResponseEntity.ok(bookService.getAllBooks());
     }
 
+    @GetMapping("/statistics")
+    public ResponseEntity<BookStatisticsResponse> getStatistics() {
+        return ResponseEntity.ok(bookService.getStatistics());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<BookResponse> getBookById(@PathVariable("id") String id) {
         return ResponseEntity.ok(bookService.getBookById(id));
+    }
+
+    @GetMapping("/{id}/detail")
+    public ResponseEntity<BookDetailResponse> getBookDetail(@PathVariable("id") String id) {
+        return ResponseEntity.ok(bookService.getDetail(id));
     }
 
     @PostMapping

@@ -1,35 +1,54 @@
 package com.group4.library.service;
 
+import com.group4.library.dto.BookBorrowHistoryItem;
+import com.group4.library.dto.BookDetailResponse;
 import com.group4.library.dto.BookRequest;
 import com.group4.library.dto.BookResponse;
+import com.group4.library.dto.BookStatisticsResponse;
+import com.group4.library.dto.TopBorrowedBookItem;
 import com.group4.library.exception.BookNotFoundException;
 import com.group4.library.model.Book;
+import com.group4.library.model.BorrowTicket;
+import com.group4.library.model.BorrowTicketDetail;
+import com.group4.library.model.Reader;
 import com.group4.library.repository.BookRepository;
 import org.springframework.stereotype.Service;
 import com.group4.library.model.TicketStatus;
 import com.group4.library.repository.BorrowTicketRepository;
+import com.group4.library.repository.ReaderRepository;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 public class BookService {
+    // Ngưỡng tồn kho thấp: sách còn <= ngưỡng này sẽ xuất hiện trong danh sách cảnh báo tồn kho thấp
+    private static final int LOW_STOCK_THRESHOLD = 2;
+    // Số lượng sách hiển thị trong bảng xếp hạng "mượn nhiều nhất"
+    private static final int TOP_BORROWED_LIMIT = 5;
+
     private final BookRepository bookRepository;
     private final BorrowTicketRepository borrowTicketRepository;
+    private final ReaderRepository readerRepository;
 
     public BookService(
             BookRepository bookRepository,
-            BorrowTicketRepository borrowTicketRepository
+            BorrowTicketRepository borrowTicketRepository,
+            ReaderRepository readerRepository
     ) {
         this.bookRepository = bookRepository;
         this.borrowTicketRepository = borrowTicketRepository;
+        this.readerRepository = readerRepository;
     }
 
     public List<BookResponse> getAllBooks() {
@@ -258,5 +277,127 @@ public class BookService {
         }
 
         return pendingBooks.size();
+    }
+
+    // ===================== Chi tiết & lịch sử mượn của một cuốn sách =====================
+
+    public BookDetailResponse getDetail(String bookId) {
+        if (bookId == null || bookId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Lỗi: Mã sách tìm kiếm không được để trống!");
+        }
+        String cleanId = bookId.trim();
+        Book book = bookRepository.findById(cleanId)
+                .orElseThrow(() -> new BookNotFoundException("Không tìm thấy sách với mã '" + cleanId + "'!"));
+
+        List<BorrowTicket> ticketsWithThisBook = borrowTicketRepository.findAll().stream()
+                .filter(t -> t.getItems() != null && t.getItems().stream()
+                        .anyMatch(d -> d != null && cleanId.equalsIgnoreCase(d.getBookId())))
+                .collect(Collectors.toList());
+
+        long timesBorrowed = ticketsWithThisBook.size();
+
+        long totalQuantityBorrowed = ticketsWithThisBook.stream()
+                .flatMap(t -> t.getItems().stream())
+                .filter(d -> cleanId.equalsIgnoreCase(d.getBookId()))
+                .mapToLong(BorrowTicketDetail::getQuantity)
+                .sum();
+
+        int currentBorrowingQuantity = (int) ticketsWithThisBook.stream()
+                .filter(t -> t.getStatus() == TicketStatus.BORROWING)
+                .flatMap(t -> t.getItems().stream())
+                .filter(d -> cleanId.equalsIgnoreCase(d.getBookId()))
+                .mapToLong(BorrowTicketDetail::getQuantity)
+                .sum();
+
+        List<BookBorrowHistoryItem> history = ticketsWithThisBook.stream()
+                .sorted(Comparator.comparing(BorrowTicket::getBorrowDate).reversed())
+                .map(t -> toHistoryItem(t, cleanId))
+                .collect(Collectors.toList());
+
+        return new BookDetailResponse(
+                book.getBookId(), book.getTitle(), book.getAuthor(), book.getGenre(),
+                book.getAvailableQuantity(), book.getPrice(),
+                timesBorrowed, totalQuantityBorrowed, currentBorrowingQuantity, history);
+    }
+
+    private BookBorrowHistoryItem toHistoryItem(BorrowTicket ticket, String bookId) {
+        int quantity = ticket.getItems().stream()
+                .filter(d -> d != null && bookId.equalsIgnoreCase(d.getBookId()))
+                .mapToInt(BorrowTicketDetail::getQuantity)
+                .sum();
+
+        String readerName = readerRepository.findById(ticket.getReaderId())
+                .map(Reader::getName)
+                .orElse("(Bạn đọc không còn tồn tại)");
+
+        return new BookBorrowHistoryItem(
+                ticket.getTicketId(), ticket.getReaderId(), readerName,
+                ticket.getBorrowDate(), ticket.getDueDate(), ticket.getReturnDate(),
+                ticket.getStatus(), quantity);
+    }
+
+    // ===================== Thống kê tổng quan kho sách =====================
+
+    public BookStatisticsResponse getStatistics() {
+        List<Book> allBooks = bookRepository.findAll();
+        List<BorrowTicket> allTickets = borrowTicketRepository.findAll();
+
+        long totalTitles = allBooks.size();
+
+        long totalAvailableCopies = allBooks.stream()
+                .mapToLong(b -> b.getAvailableQuantity() != null ? b.getAvailableQuantity() : 0L)
+                .sum();
+
+        long totalBorrowedCopies = allTickets.stream()
+                .filter(t -> t.getStatus() == TicketStatus.BORROWING)
+                .filter(t -> t.getItems() != null)
+                .flatMap(t -> t.getItems().stream())
+                .mapToLong(BorrowTicketDetail::getQuantity)
+                .sum();
+
+        long totalCopies = totalAvailableCopies + totalBorrowedCopies;
+
+        Map<String, Long> countByGenre = allBooks.stream()
+                .collect(Collectors.groupingBy(
+                        b -> (b.getGenre() == null || b.getGenre().isBlank()) ? "Chưa phân loại" : b.getGenre(),
+                        Collectors.counting()));
+
+        List<BookResponse> lowStockBooks = allBooks.stream()
+                .filter(b -> b.getAvailableQuantity() != null && b.getAvailableQuantity() <= LOW_STOCK_THRESHOLD)
+                .sorted(Comparator.comparing(Book::getAvailableQuantity))
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+
+        List<TopBorrowedBookItem> topBorrowedBooks = buildTopBorrowedBooks(allTickets, allBooks);
+
+        return new BookStatisticsResponse(totalTitles, totalCopies, totalAvailableCopies,
+                totalBorrowedCopies, countByGenre, lowStockBooks, topBorrowedBooks);
+    }
+
+    private List<TopBorrowedBookItem> buildTopBorrowedBooks(List<BorrowTicket> tickets, List<Book> books) {
+        Map<String, Long> quantityByBook = new HashMap<>();
+        Map<String, Long> timesByBook = new HashMap<>();
+
+        for (BorrowTicket ticket : tickets) {
+            if (ticket.getItems() == null) continue;
+            for (BorrowTicketDetail detail : ticket.getItems()) {
+                if (detail == null || detail.getBookId() == null) continue;
+                quantityByBook.merge(detail.getBookId(), (long) detail.getQuantity(), Long::sum);
+                timesByBook.merge(detail.getBookId(), 1L, Long::sum);
+            }
+        }
+
+        Map<String, String> titleById = books.stream()
+                .collect(Collectors.toMap(Book::getBookId, Book::getTitle, (a, b) -> a));
+
+        return quantityByBook.entrySet().stream()
+                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                .limit(TOP_BORROWED_LIMIT)
+                .map(e -> new TopBorrowedBookItem(
+                        e.getKey(),
+                        titleById.getOrDefault(e.getKey(), "(Sách không còn tồn tại)"),
+                        timesByBook.getOrDefault(e.getKey(), 0L),
+                        e.getValue()))
+                .collect(Collectors.toList());
     }
 }

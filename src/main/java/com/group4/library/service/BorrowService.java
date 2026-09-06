@@ -4,12 +4,15 @@ import com.group4.library.dto.BorrowItemRequest;
 import com.group4.library.dto.BorrowItemResponse;
 import com.group4.library.dto.BorrowRequest;
 import com.group4.library.dto.BorrowTicketResponse;
+import com.group4.library.dto.RenewTicketRequest;
 
 import com.group4.library.exception.BorrowLimitExceededException;
 import com.group4.library.exception.InvalidBorrowDateException;
 import com.group4.library.exception.InvalidQuantityException;
 import com.group4.library.exception.OutOfStockException;
 import com.group4.library.exception.ResourceNotFoundException;
+import com.group4.library.exception.TicketCancelNotAllowedException;
+import com.group4.library.exception.TicketRenewalNotAllowedException;
 
 import com.group4.library.model.Book;
 import com.group4.library.model.BorrowTicket;
@@ -30,6 +33,9 @@ import java.util.stream.Stream;
 
 @Service
 public class BorrowService {
+
+    // Số lần tối đa một phiếu mượn được phép gia hạn
+    private static final int MAX_RENEWAL_TIMES = 2;
 
     private final BorrowTicketRepository borrowTicketRepository;
     private final ReaderRepository readerRepository;
@@ -211,6 +217,82 @@ public class BorrowService {
         return mapToResponse(ticket);
     }
 
+    // ===================== Hủy phiếu mượn =====================
+
+    public BorrowTicketResponse cancelTicket(String ticketId) {
+        if (ticketId == null || ticketId.isBlank()) {
+            throw new IllegalArgumentException("Mã phiếu mượn không được để trống");
+        }
+
+        BorrowTicket ticket = borrowTicketRepository.findById(ticketId.trim())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu mượn: " + ticketId));
+
+        if (ticket.getStatus() != TicketStatus.BORROWING) {
+            throw new TicketCancelNotAllowedException(
+                    "Chỉ có thể hủy phiếu đang ở trạng thái BORROWING. Phiếu hiện tại đang ở trạng thái: "
+                            + ticket.getStatus());
+        }
+
+        // Hoàn trả lại số lượng sách đã trừ kho lúc tạo phiếu
+        if (ticket.getItems() != null) {
+            for (BorrowTicketDetail detail : ticket.getItems()) {
+                Book book = bookRepository.findById(detail.getBookId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sách: " + detail.getBookId()));
+                book.returnItem(detail.getQuantity());
+                boolean updated = bookRepository.update(book);
+                if (!updated) {
+                    throw new IllegalStateException("Không thể hoàn kho sách khi hủy phiếu: " + detail.getBookId());
+                }
+            }
+        }
+
+        ticket.setStatus(TicketStatus.CANCELLED);
+        BorrowTicket saved = borrowTicketRepository.save(ticket);
+        return mapToResponse(saved);
+    }
+
+    // ===================== Gia hạn phiếu mượn =====================
+
+    public BorrowTicketResponse renewTicket(String ticketId, RenewTicketRequest request) {
+        if (ticketId == null || ticketId.isBlank()) {
+            throw new IllegalArgumentException("Mã phiếu mượn không được để trống");
+        }
+        if (request == null || request.getNewDueDate() == null) {
+            throw new InvalidBorrowDateException("Hạn trả mới không được để trống");
+        }
+
+        BorrowTicket ticket = borrowTicketRepository.findById(ticketId.trim())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phiếu mượn: " + ticketId));
+
+        if (ticket.getStatus() != TicketStatus.BORROWING) {
+            throw new TicketRenewalNotAllowedException(
+                    "Chỉ có thể gia hạn phiếu đang mượn. Phiếu hiện tại đang ở trạng thái: " + ticket.getStatus());
+        }
+
+        LocalDate today = LocalDate.now();
+        if (ticket.getDueDate().isBefore(today)) {
+            throw new TicketRenewalNotAllowedException(
+                    "Phiếu đã quá hạn trả, không thể gia hạn. Vui lòng trả sách và nộp phạt trước!");
+        }
+
+        if (ticket.getRenewalCount() >= MAX_RENEWAL_TIMES) {
+            throw new TicketRenewalNotAllowedException(
+                    String.format("Phiếu đã được gia hạn tối đa %d lần, không thể gia hạn thêm!", MAX_RENEWAL_TIMES));
+        }
+
+        LocalDate newDueDate = request.getNewDueDate();
+        if (!newDueDate.isAfter(ticket.getDueDate())) {
+            throw new InvalidBorrowDateException(
+                    "Hạn trả mới phải sau hạn trả hiện tại (" + ticket.getDueDate() + ")");
+        }
+
+        ticket.setDueDate(newDueDate);
+        ticket.setRenewalCount(ticket.getRenewalCount() + 1);
+
+        BorrowTicket saved = borrowTicketRepository.save(ticket);
+        return mapToResponse(saved);
+    }
+
     private BorrowTicketResponse mapToResponse(BorrowTicket ticket) {
         BorrowTicketResponse resp = new BorrowTicketResponse();
         resp.setTicketId(ticket.getTicketId());
@@ -219,6 +301,7 @@ public class BorrowService {
         resp.setDueDate(ticket.getDueDate());
         resp.setReturnDate(ticket.getReturnDate());
         resp.setStatus(ticket.getStatus());
+        resp.setRenewalCount(ticket.getRenewalCount());
 
         if (ticket.getItems() != null) {
             List<BorrowItemResponse> itemDtos = ticket.getItems().stream()

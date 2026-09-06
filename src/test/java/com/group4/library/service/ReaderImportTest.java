@@ -4,6 +4,7 @@ import com.group4.library.dto.ReaderImportSummary;
 import com.group4.library.exception.BusinessException;
 import com.group4.library.model.LecturerReader;
 import com.group4.library.model.StudentReader;
+import com.group4.library.repository.BookRepository;
 import com.group4.library.repository.BorrowTicketRepository;
 import com.group4.library.utils.CsvUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +31,7 @@ class ReaderImportTest {
     void setUp() {
         repository = new InMemoryReaderRepository();
         BorrowTicketRepository borrowTicketRepository = Mockito.mock(BorrowTicketRepository.class);
-        readerService = new ReaderService(repository, borrowTicketRepository);
+        readerService = new ReaderService(repository, borrowTicketRepository, Mockito.mock(BookRepository.class));
         readerCsvService = new ReaderCsvService(readerService);
     }
 
@@ -209,10 +210,13 @@ class ReaderImportTest {
         String exported = readerCsvService.exportToCsv();
 
         InMemoryReaderRepository repositoryMoi = new InMemoryReaderRepository();
-        ReaderService serviceMoi = new ReaderService(repositoryMoi, Mockito.mock(BorrowTicketRepository.class));
+        ReaderService serviceMoi = new ReaderService(
+                repositoryMoi,
+                Mockito.mock(BorrowTicketRepository.class),
+                Mockito.mock(BookRepository.class)
+        );
         ReaderCsvService csvServiceMoi = new ReaderCsvService(serviceMoi);
 
-        // exportToCsv có thêm cột maxBorrowLimit ở cuối (không dùng khi import lại) -> cắt về đúng 4 cột đầu
         String[] lines = exported.split("\n");
         StringBuilder importable = new StringBuilder("id,name,phoneNumber,type\n");
         for (int i = 1; i < lines.length; i++) {

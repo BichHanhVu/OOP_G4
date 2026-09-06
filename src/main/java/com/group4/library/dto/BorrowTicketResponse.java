@@ -13,6 +13,7 @@ public class BorrowTicketResponse {
     private LocalDate returnDate;
     private TicketStatus status;
     private List<BorrowItemResponse> items; // Sửa từ BorrowItemRequest -> BorrowItemResponse
+    private int renewalCount;
 
     public BorrowTicketResponse() {
     }
@@ -72,5 +73,13 @@ public class BorrowTicketResponse {
 
     public void setItems(List<BorrowItemResponse> items) {
         this.items = items;
+    }
+
+    public int getRenewalCount() {
+        return renewalCount;
+    }
+
+    public void setRenewalCount(int renewalCount) {
+        this.renewalCount = renewalCount;
     }
 }
