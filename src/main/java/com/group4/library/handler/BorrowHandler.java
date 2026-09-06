@@ -8,7 +8,8 @@ import com.group4.library.service.BorrowService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import com.group4.library.dto.RenewTicketRequest;
+import com.group4.library.dto.RenewTicketResponse;
 import java.util.List;
 
 @RestController
@@ -63,15 +64,18 @@ public class BorrowHandler {
     public ResponseEntity<BorrowTicketResponse> cancelTicket(@PathVariable("id") String id) {
         return ResponseEntity.ok(borrowService.cancelTicket(id));
     }
-
-    /**
-     * POST /api/borrow-tickets/{id}/renew
-     * Gia hạn hạn trả cho một phiếu mượn chưa quá hạn và chưa hết lượt gia hạn.
+  
+     * PATCH /api/borrow-tickets/{id}/renew
+     * Gia hạn phiếu mượn
      */
-    @PostMapping("/{id}/renew")
-    public ResponseEntity<BorrowTicketResponse> renewTicket(
+    @PatchMapping("/{id}/renew")
+    public ResponseEntity<RenewTicketResponse> renewBorrowTicket(
             @PathVariable("id") String id,
             @RequestBody RenewTicketRequest request) {
-        return ResponseEntity.ok(borrowService.renewTicket(id, request));
+
+        RenewTicketResponse response =
+                borrowService.renewBorrowTicket(id, request);
+
+        return ResponseEntity.ok(response);
     }
 }

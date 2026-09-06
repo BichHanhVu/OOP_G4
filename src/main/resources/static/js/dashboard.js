@@ -1,14 +1,16 @@
-document.addEventListener("DOMContentLoaded", loadDashboard);
+document.addEventListener("DOMContentLoaded", () => {
+  loadDashboard();
+  displayCurrentDate();
+  initializeSidebar();
+});
 
 /**
  * Tải dữ liệu thống kê từ backend.
  */
 async function loadDashboard() {
-  const errorElement = document.getElementById("dashboardError");
+  setText("dashboardError", "");
 
   try {
-    errorElement.textContent = "";
-
     const data = await apiRequest("/dashboard");
 
     const totalReaders = Number(data.totalReaders ?? 0);
@@ -17,25 +19,24 @@ async function loadDashboard() {
     const overdueTickets = Number(data.overdueTickets ?? 0);
     const totalFineAmount = Number(data.totalFineAmount ?? 0);
 
-    // Bốn thẻ thống kê chính
     setText("totalReaders", formatNumber(totalReaders));
     setText("totalBooks", formatNumber(totalBooks));
     setText("borrowingTickets", formatNumber(borrowingTickets));
     setText("overdueTickets", formatNumber(overdueTickets));
 
-    // Danh sách tình trạng thư viện
     setText("overviewReaders", formatNumber(totalReaders));
     setText("overviewBooks", formatNumber(totalBooks));
     setText("overviewBorrowing", formatNumber(borrowingTickets));
     setText("overviewOverdue", formatNumber(overdueTickets));
 
-    // Tổng tiền phạt
     setText("totalFineAmount", `${formatNumber(totalFineAmount)} đ`);
   } catch (error) {
     console.error("Không thể tải dashboard:", error);
 
-    errorElement.textContent =
-      error.message || "Không thể tải dữ liệu dashboard.";
+    setText(
+      "dashboardError",
+      error.message || "Không thể tải dữ liệu dashboard.",
+    );
   }
 }
 
@@ -55,4 +56,46 @@ function setText(elementId, value) {
  */
 function formatNumber(value) {
   return Number(value).toLocaleString("vi-VN");
+}
+
+function displayCurrentDate() {
+  const currentDateElement = document.getElementById("currentDate");
+  if (!currentDateElement) return;
+
+  const currentDate = new Intl.DateTimeFormat("vi-VN", {
+    weekday: "long",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(new Date());
+
+  currentDateElement.innerHTML = `
+    <i class="bi bi-calendar3"></i>
+    <span>${currentDate}</span>
+  `;
+}
+
+function initializeSidebar() {
+  const menuToggle = document.getElementById("menuToggle");
+  const appSidebar = document.getElementById("appSidebar");
+
+  if (!menuToggle || !appSidebar) return;
+
+  menuToggle.addEventListener("click", (event) => {
+    event.stopPropagation();
+    appSidebar.classList.toggle("open");
+  });
+
+  document.addEventListener("click", (event) => {
+    const clickedInsideSidebar = appSidebar.contains(event.target);
+    const clickedMenuButton = menuToggle.contains(event.target);
+
+    if (
+      window.innerWidth <= 768 &&
+      !clickedInsideSidebar &&
+      !clickedMenuButton
+    ) {
+      appSidebar.classList.remove("open");
+    }
+  });
 }

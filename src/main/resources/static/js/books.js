@@ -123,8 +123,8 @@ function renderBookTable(books) {
     const row = document.createElement("tr");
     const isAvailable = book.availableQuantity > 0;
     const statusBadge = isAvailable
-      ? `<span class="badge bg-success">Còn sách</span>`
-      : `<span class="badge bg-danger">Hết sách</span>`;
+      ? '<span class="status-badge status-returned">Còn sách</span>'
+      : '<span class="status-badge status-overdue">Hết sách</span>';
 
     const safeBookId = escapeHtml(book.bookId);
     const safeTitle = escapeHtml(book.title);
@@ -144,10 +144,19 @@ function renderBookTable(books) {
             <td>${priceFormatted} đ</td>
             <td>${statusBadge}</td>
             <td class="text-center">
-                <button class="btn btn-sm btn-outline-warning me-1" onclick="openEditModal('${safeBookId}')">
+                <button
+                    class="btn btn-sm btn-outline-primary me-1"
+                    onclick="openEditModal('${safeBookId}')"
+                >
+                    <i class="bi bi-pencil-square"></i>
                     Cập nhật
                 </button>
-                <button class="btn btn-sm btn-outline-danger" onclick="deleteBook('${safeBookId}')">
+
+                <button
+                    class="btn btn-sm btn-outline-danger"
+                    onclick="deleteBook('${safeBookId}')"
+                >
+                    <i class="bi bi-trash"></i>
                     Xóa
                 </button>
             </td>
