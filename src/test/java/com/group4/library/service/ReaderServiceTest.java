@@ -1,9 +1,14 @@
 package com.group4.library.service;
 
+import com.group4.library.dto.PagedReaderResponse;
 import com.group4.library.dto.ReaderRequest;
 import com.group4.library.dto.ReaderResponse;
-import com.group4.library.exception.BusinessException;
-import com.group4.library.exception.ResourceNotFoundException;
+import com.group4.library.dto.ReaderSearchRequest;
+import com.group4.library.exception.DuplicateReaderIdException;
+import com.group4.library.exception.EmptyReaderNameException;
+import com.group4.library.exception.InvalidPhoneNumberException;
+import com.group4.library.exception.InvalidReaderTypeException;
+import com.group4.library.exception.ReaderNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -57,44 +62,76 @@ class ReaderServiceTest {
     }
 
     @Test
-    void themBanDoc_maTrung_baoLoi() {
+    void themBanDoc_maTrung_nemDuplicateReaderIdException() {
         readerService.create(buildRequest("R001", "Nguyễn Văn A", "0912345678", "STUDENT"));
 
         ReaderRequest trung = buildRequest("R001", "Trần Thị B", "0987654321", "LECTURER");
 
-        BusinessException ex = assertThrows(BusinessException.class,
-                () -> readerService.create(trung));
-        assertTrue(ex.getMessage().contains("đã tồn tại"));
+        assertThrows(DuplicateReaderIdException.class, () -> readerService.create(trung));
     }
 
     @Test
-    void themBanDoc_tenRong_baoLoi() {
+    void themBanDoc_tenRong_nemEmptyReaderNameException() {
         ReaderRequest request = buildRequest(null, "   ", "0912345678", "STUDENT");
 
-        assertThrows(BusinessException.class, () -> readerService.create(request));
+        assertThrows(EmptyReaderNameException.class, () -> readerService.create(request));
     }
 
     @Test
-    void themBanDoc_sdtSaiDinhDang_baoLoi() {
+    void themBanDoc_sdtSaiDinhDang_nemInvalidPhoneNumberException() {
         ReaderRequest request = buildRequest(null, "Nguyễn Văn A", "abc123", "STUDENT");
 
-        assertThrows(BusinessException.class, () -> readerService.create(request));
+        assertThrows(InvalidPhoneNumberException.class, () -> readerService.create(request));
     }
 
     @Test
-    void timKiem_dungKetQua() {
+    void themBanDoc_loaiKhongHopLe_nemInvalidReaderTypeException() {
+        ReaderRequest request = buildRequest(null, "Nguyễn Văn A", "0912345678", "UNKNOWN");
+
+        assertThrows(InvalidReaderTypeException.class, () -> readerService.create(request));
+    }
+
+    @Test
+    void timKiem_theoTen_dungKetQua() {
         readerService.create(buildRequest("R001", "Nguyễn Văn A", "0912345678", "STUDENT"));
         readerService.create(buildRequest("R002", "Trần Thị B", "0987654321", "LECTURER"));
 
-        List<ReaderResponse> byName = readerService.getAll("văn a", null);
-        List<ReaderResponse> byId = readerService.getAll("R002", null);
-        List<ReaderResponse> byType = readerService.getAll(null, "LECTURER");
+        List<ReaderResponse> ketQua = search("văn a", null).getContent();
 
-        assertEquals(1, byName.size());
-        assertEquals("R001", byName.get(0).getId());
-        assertEquals("R002", byId.get(0).getId());
-        assertEquals(1, byType.size());
-        assertEquals("R002", byType.get(0).getId());
+        assertEquals(1, ketQua.size());
+        assertEquals("R001", ketQua.get(0).getId());
+    }
+
+    @Test
+    void timKiem_theoMa_dungKetQua() {
+        readerService.create(buildRequest("R001", "Nguyễn Văn A", "0912345678", "STUDENT"));
+        readerService.create(buildRequest("R002", "Trần Thị B", "0987654321", "LECTURER"));
+
+        List<ReaderResponse> ketQua = search("R002", null).getContent();
+
+        assertEquals(1, ketQua.size());
+        assertEquals("R002", ketQua.get(0).getId());
+    }
+
+    @Test
+    void timKiem_theoLoai_dungKetQua() {
+        readerService.create(buildRequest("R001", "Nguyễn Văn A", "0912345678", "STUDENT"));
+        readerService.create(buildRequest("R002", "Trần Thị B", "0987654321", "LECTURER"));
+
+        List<ReaderResponse> ketQua = search(null, "LECTURER").getContent();
+
+        assertEquals(1, ketQua.size());
+        assertEquals("R002", ketQua.get(0).getId());
+    }
+
+    @Test
+    void timKiem_khongCoDieuKien_traVeTatCa() {
+        readerService.create(buildRequest("R001", "Nguyễn Văn A", "0912345678", "STUDENT"));
+        readerService.create(buildRequest("R002", "Trần Thị B", "0987654321", "LECTURER"));
+
+        List<ReaderResponse> ketQua = search(null, null).getContent();
+
+        assertEquals(2, ketQua.size());
     }
 
     @Test
@@ -111,12 +148,29 @@ class ReaderServiceTest {
     }
 
     @Test
+    void suaBanDoc_khongTonTai_nemReaderNotFoundException() {
+        ReaderRequest request = buildRequest(null, "Nguyễn Văn A", "0912345678", "STUDENT");
+
+        assertThrows(ReaderNotFoundException.class, () -> readerService.update("R999", request));
+    }
+
+    @Test
     void xoaBanDoc_dungKetQua() {
         readerService.create(buildRequest("R001", "Nguyễn Văn A", "0912345678", "STUDENT"));
 
         readerService.delete("R001");
 
-        assertThrows(ResourceNotFoundException.class, () -> readerService.getById("R001"));
+        assertThrows(ReaderNotFoundException.class, () -> readerService.getById("R001"));
+    }
+
+    @Test
+    void xoaBanDoc_khongTonTai_nemReaderNotFoundException() {
+        assertThrows(ReaderNotFoundException.class, () -> readerService.delete("R999"));
+    }
+
+    @Test
+    void layChiTiet_khongTonTai_nemReaderNotFoundException() {
+        assertThrows(ReaderNotFoundException.class, () -> readerService.getById("R999"));
     }
 
     private ReaderRequest buildRequest(String id, String name, String phone, String type) {
@@ -126,5 +180,33 @@ class ReaderServiceTest {
         request.setPhoneNumber(phone);
         request.setType(type);
         return request;
+    }
+
+    private PagedReaderResponse<ReaderResponse> search(String keyword, String type) {
+        return readerService.search(new ReaderSearchRequest(keyword, type, null, null, null, 100));
+    }
+    @Test
+    void xoaBanDoc_conPhieuDangMuon_nemBusinessException() {
+        readerService.create(buildRequest("R001", "Nguyễn Văn A", "0912345678", "STUDENT"));
+
+        Mockito.when(borrowTicketRepository.findByReaderIdAndStatus(
+                        Mockito.eq("R001"), Mockito.any()))
+                .thenReturn(List.of(Mockito.mock(com.group4.library.model.BorrowTicket.class)));
+
+        assertThrows(com.group4.library.exception.BusinessException.class,
+                () -> readerService.delete("R001"));
+    }
+
+    @Test
+    void xoaBanDoc_khongConPhieuDangMuon_xoaThanhCong() {
+        readerService.create(buildRequest("R001", "Nguyễn Văn A", "0912345678", "STUDENT"));
+
+        Mockito.when(borrowTicketRepository.findByReaderIdAndStatus(
+                        Mockito.eq("R001"), Mockito.any()))
+                .thenReturn(List.of());
+
+        readerService.delete("R001");
+
+        assertThrows(ReaderNotFoundException.class, () -> readerService.getById("R001"));
     }
 }
