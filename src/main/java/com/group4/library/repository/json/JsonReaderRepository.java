@@ -28,16 +28,54 @@ public class JsonReaderRepository implements ReaderRepository {
     }
 
     static class ReaderRecord {
-        public String id;
-        public String name;
-        public String phoneNumber;
-        public String type;
+        private String id;
+        private String name;
+        private String phoneNumber;
+        private String type;
 
-        public ReaderRecord() {}
-        public ReaderRecord(String id, String name, String phoneNumber, String type) {
+        public ReaderRecord() {
+        }
+
+        public ReaderRecord(
+                String id,
+                String name,
+                String phoneNumber,
+                String type) {
             this.id = id;
             this.name = name;
             this.phoneNumber = phoneNumber;
+            this.type = type;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getPhoneNumber() {
+            return phoneNumber;
+        }
+
+        public void setPhoneNumber(String phoneNumber) {
+            this.phoneNumber = phoneNumber;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
             this.type = type;
         }
     }

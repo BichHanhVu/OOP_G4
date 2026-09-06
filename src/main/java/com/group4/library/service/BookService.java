@@ -1,44 +1,18 @@
 package com.group4.library.service;
 
-import com.group4.library.dto.BookBorrowHistoryItem;
-import com.group4.library.dto.BookDetailResponse;
-import com.group4.library.dto.BookRequest;
-import com.group4.library.dto.BookResponse;
-import com.group4.library.dto.BookStatisticsResponse;
-import com.group4.library.dto.TopBorrowedBookItem;
+import com.group4.library.dto.*;
 import com.group4.library.exception.BookNotFoundException;
-import com.group4.library.model.Book;
-import com.group4.library.model.BorrowTicket;
-import com.group4.library.model.BorrowTicketDetail;
-import com.group4.library.model.Reader;
+import com.group4.library.model.*;
 import com.group4.library.repository.BookRepository;
-
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-import com.group4.library.model.TicketStatus;
 import com.group4.library.repository.BorrowTicketRepository;
 import com.group4.library.repository.ReaderRepository;
+import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service

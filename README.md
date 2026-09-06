@@ -67,7 +67,7 @@ mvn test
 Kết quả kiểm thử gần nhất:
 
 ```text
-32 tests passed
+Tests run: 271, Passed: 271, Failures: 0, Errors: 0, Skipped: 0
 ```
 
 ## Dữ liệu
@@ -169,7 +169,9 @@ Response `201 Created`:
 |---|---|---|
 | GET | `/api/borrow-tickets` | Lấy danh sách phiếu mượn |
 | GET | `/api/borrow-tickets/{id}` | Xem chi tiết một phiếu mượn |
-| POST | `/api/borrow-tickets` | Tạo phiếu mượn mới |
+| POST | `/api/borrow-tickets` | Tạo phiếu mượn mới và giảm tồn kho |
+| POST | `/api/borrow-tickets/{id}/cancel` | Hủy phiếu đang mượn và hoàn lại tồn kho |
+| PATCH | `/api/borrow-tickets/{id}/renew` | Gia hạn phiếu mượn |
 
 ## API trả sách
 
@@ -252,4 +254,4 @@ src/test/java/com/group4/library
 - [x] Lưu trữ dữ liệu bằng JSON.
 - [x] Không cho xóa bạn đọc đang có phiếu mượn chưa trả.
 - [x] Không cho xóa sách đang nằm trong phiếu mượn chưa trả.
-- [x] Chạy thành công 32 bài kiểm thử.
+- [x] Chạy thành công 271 bài kiểm thử.

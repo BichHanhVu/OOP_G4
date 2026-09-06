@@ -102,11 +102,25 @@ public class ReaderCsvService {
 
     private void validateHeader(String headerLine) {
         if (headerLine == null) {
-            throw new BusinessException("File CSV rỗng, thiếu dòng tiêu đề");
+            throw new BusinessException(
+                    "File CSV rỗng, thiếu dòng tiêu đề"
+            );
         }
-        List<String> header = CsvUtils.parseLine(headerLine).stream().map(String::trim).toList();
-        if (header.size() < 4 || !header.subList(0, 4).equals(EXPECTED_HEADER)) {
-            throw new BusinessException("Tiêu đề CSV không đúng, cần đúng thứ tự: id,name,phoneNumber,type");
+
+        if (headerLine.startsWith("\uFEFF")) {
+            headerLine = headerLine.substring(1);
+        }
+
+        List<String> header = CsvUtils.parseLine(headerLine)
+                .stream()
+                .map(String::trim)
+                .toList();
+
+        if (header.size() < 4
+                || !header.subList(0, 4).equals(EXPECTED_HEADER)) {
+            throw new BusinessException(
+                    "Tiêu đề CSV không đúng, cần đúng thứ tự: id,name,phoneNumber,type"
+            );
         }
     }
 

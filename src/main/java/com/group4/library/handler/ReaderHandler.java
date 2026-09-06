@@ -87,15 +87,29 @@ public class ReaderHandler {
     }
 
     @PostMapping("/import")
-    public ResponseEntity<ReaderImportSummary> importCsv(@RequestParam("file") MultipartFile file) {
-        if (file.isEmpty()) {
-            throw new BusinessException("Vui lòng chọn file CSV để import");
+    public ResponseEntity<ReaderImportSummary> importCsv(
+            @RequestParam(value = "file", required = false)
+            MultipartFile file) {
+
+        if (file == null || file.isEmpty()) {
+            throw new BusinessException(
+                    "Vui lòng chọn file CSV để import"
+            );
         }
+
         try {
-            log.info("Nhận file import CSV: {}", file.getOriginalFilename());
-            return ResponseEntity.ok(readerCsvService.importFromCsv(file.getInputStream()));
+            log.info(
+                    "Nhận file import CSV: {}",
+                    file.getOriginalFilename()
+            );
+
+            return ResponseEntity.ok(
+                    readerCsvService.importFromCsv(file.getInputStream())
+            );
         } catch (IOException e) {
-            throw new BusinessException("Không đọc được file: " + e.getMessage());
+            throw new BusinessException(
+                    "Không đọc được file: " + e.getMessage()
+            );
         }
     }
 

@@ -1,5 +1,5 @@
 package com.group4.library.handler;
-
+import com.group4.library.main.LibraryApplication;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.group4.library.dto.ReaderRequest;
 import com.group4.library.model.Book;
@@ -35,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@SpringBootTest(classes = LibraryApplication.class)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class ReaderHandlerIntegrationTest {

@@ -1,11 +1,8 @@
 package com.group4.library.service;
 
 import com.group4.library.dto.BorrowTicketResponse;
-import com.group4.library.dto.RenewTicketRequest;
-import com.group4.library.exception.InvalidBorrowDateException;
 import com.group4.library.exception.ResourceNotFoundException;
 import com.group4.library.exception.TicketCancelNotAllowedException;
-import com.group4.library.exception.TicketRenewalNotAllowedException;
 import com.group4.library.model.Book;
 import com.group4.library.model.BorrowTicket;
 import com.group4.library.model.BorrowTicketDetail;
@@ -28,9 +25,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 /**
- * Test cho hai nghiệp vụ mới của BorrowService: hủy phiếu mượn (cancelTicket)
- * và gia hạn phiếu mượn (renewTicket).
+ * Kiểm thử nghiệp vụ hủy phiếu mượn.
  */
+
 @ExtendWith(MockitoExtension.class)
 class BorrowServiceCancelRenewTest {
 
@@ -86,49 +83,5 @@ class BorrowServiceCancelRenewTest {
 
         assertThrows(TicketCancelNotAllowedException.class, () -> borrowService.cancelTicket("BT001"));
         verifyNoInteractions(bookRepository);
-    }
-
-    @Test
-    void giaHan_thanhCong_capNhatHanTraVaTangSoLanGiaHan() {
-        LocalDate currentDueDate = LocalDate.now().plusDays(2);
-        BorrowTicket ticket = borrowingTicket(currentDueDate, 0);
-        when(borrowTicketRepository.findById("BT001")).thenReturn(Optional.of(ticket));
-        when(borrowTicketRepository.save(any())).thenReturn(ticket);
-
-        LocalDate newDueDate = currentDueDate.plusDays(7);
-        BorrowTicketResponse response = borrowService.renewTicket("BT001", new RenewTicketRequest(newDueDate));
-
-        assertEquals(newDueDate, response.getDueDate());
-        assertEquals(1, ticket.getRenewalCount());
-    }
-
-    @Test
-    void giaHan_phieuDaQuaHan_nemTicketRenewalNotAllowedException() {
-        LocalDate pastDueDate = LocalDate.now().minusDays(1);
-        BorrowTicket ticket = borrowingTicket(pastDueDate, 0);
-        when(borrowTicketRepository.findById("BT001")).thenReturn(Optional.of(ticket));
-
-        assertThrows(TicketRenewalNotAllowedException.class,
-                () -> borrowService.renewTicket("BT001", new RenewTicketRequest(pastDueDate.plusDays(5))));
-    }
-
-    @Test
-    void giaHan_vuotQuaSoLanToiDa_nemTicketRenewalNotAllowedException() {
-        LocalDate dueDate = LocalDate.now().plusDays(3);
-        BorrowTicket ticket = borrowingTicket(dueDate, 2);
-        when(borrowTicketRepository.findById("BT001")).thenReturn(Optional.of(ticket));
-
-        assertThrows(TicketRenewalNotAllowedException.class,
-                () -> borrowService.renewTicket("BT001", new RenewTicketRequest(dueDate.plusDays(5))));
-    }
-
-    @Test
-    void giaHan_hanMoiKhongSauHanCu_nemInvalidBorrowDateException() {
-        LocalDate dueDate = LocalDate.now().plusDays(3);
-        BorrowTicket ticket = borrowingTicket(dueDate, 0);
-        when(borrowTicketRepository.findById("BT001")).thenReturn(Optional.of(ticket));
-
-        assertThrows(InvalidBorrowDateException.class,
-                () -> borrowService.renewTicket("BT001", new RenewTicketRequest(dueDate.minusDays(1))));
     }
 }

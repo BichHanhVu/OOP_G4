@@ -189,7 +189,9 @@ class ReaderImportTest {
         String csv = readerCsvService.exportToCsv();
         List<String> lines = List.of(csv.split("\n"));
 
-        assertEquals("id,name,phoneNumber,type,maxBorrowLimit", lines.get(0).trim());
+        assertTrue(csv.startsWith("\uFEFF"));
+
+        assertEquals("id,name,phoneNumber,type,maxBorrowLimit", lines.get(0).replace("\uFEFF", "").trim());
         assertEquals(3, lines.size());
         assertTrue(lines.get(1).contains("R001"));
         assertTrue(lines.get(1).contains("Nguyễn Văn A"));
